@@ -3,7 +3,7 @@ import {ToolExecutor, ToolExecutionResult} from './terminal-history.js';
 import {Logger} from '../services/logger.js';
 
 // Maximum characters to include in LLM context (most recent output)
-const MAX_COMMAND_OUTPUT_LENGTH = 500;
+const MAX_COMMAND_OUTPUT_LENGTH = 1250;
 
 // Interface for terminal command execution
 export interface TerminalExecutor {
@@ -106,7 +106,7 @@ export class MutableExecutionToolExecutor implements ToolExecutor {
 
 			// Truncate to most recent characters for LLM context
 			const truncatedResult = result.length > MAX_COMMAND_OUTPUT_LENGTH 
-				? '...' + result.slice(-MAX_COMMAND_OUTPUT_LENGTH)
+				? `[TRUNCATED TO ${MAX_COMMAND_OUTPUT_LENGTH} CHARS]` + result.slice(-MAX_COMMAND_OUTPUT_LENGTH)
 				: result;
 
 			return {
