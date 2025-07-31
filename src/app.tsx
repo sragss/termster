@@ -1,4 +1,4 @@
-import React, {useState, useRef, useEffect} from 'react';
+import React, {useState, useRef, useEffect, useMemo, useCallback} from 'react';
 import {Box, Text, useInput, useStdout} from 'ink';
 import pty from 'node-pty';
 import HeaderAnimation from './HeaderAnimation.js';
@@ -37,24 +37,28 @@ const App = () => {
 		checkApiKey();
 	}, []);
 
-	// Compute window dimensions upfront
-	const totalCols = stdout.columns || 80;
-	const totalRows = stdout.rows - 2 || 24;
-	const statusLineHeight = 1;
-	const headerHeight = 8; // HeaderAnimation height
-	const availableHeight = totalRows - statusLineHeight - headerHeight;
-	const paneHeight = availableHeight;
+	// Memoize window dimensions to prevent unnecessary re-renders
+	const dimensions = useMemo(() => {
+		const totalCols = stdout.columns || 80;
+		const totalRows = stdout.rows - 2 || 24;
+		const statusLineHeight = 1;
+		const headerHeight = 8; // HeaderAnimation height
+		const availableHeight = totalRows - statusLineHeight - headerHeight;
+		const paneHeight = availableHeight;
+		
+		return { totalCols, totalRows, paneHeight };
+	}, [stdout.columns, stdout.rows]);
 
-	const handleCommand = (command: string) => {
+	const handleCommand = useCallback((command: string) => {
 		if (ptyRef.current) {
 			// Send a newline first to ensure we're on a fresh line
 			ptyRef.current.write('\r');
 			// Send the command
 			ptyRef.current.write(command + '\r');
 		}
-	};
+	}, []); // No dependencies - ptyRef.current is accessed directly
 
-	const handleApiKeySubmitted = async (apiKey: string) => {
+	const handleApiKeySubmitted = useCallback(async (apiKey: string) => {
 		try {
 			await configService.current.saveApiKey(apiKey);
 			setHasApiKey(true);
@@ -62,7 +66,12 @@ const App = () => {
 			console.error('Error saving API key:', error);
 			// Could show error state here
 		}
-	};
+	}, []); // No dependencies - uses ref and setter
+
+	const handlePtyReady = useCallback((pty: pty.IPty) => {
+		ptyRef.current = pty;
+		setTerminalExecutor(new PTYTerminalExecutor(pty));
+	}, []);
 
 	useInput((input, key) => {
 		// Global exit handlers
@@ -78,38 +87,35 @@ const App = () => {
 	});
 
 	return (
-		<Box width="100%" height={totalRows} flexDirection="column">
-			<HeaderAnimation height={headerHeight} />
+		<Box width="100%" height={dimensions.totalRows} flexDirection="column">
+			<HeaderAnimation height={8} />
 
 			{/* Show API key prompt if needed, otherwise show main app */}
 			{hasApiKey === null ? (
 				<Box
 					width="100%"
-					height={paneHeight}
+					height={dimensions.paneHeight}
 					justifyContent="center"
 					alignItems="center"
 				>
 					<Text>Loading...</Text>
 				</Box>
 			) : hasApiKey === false ? (
-				<Box width="100%" height={paneHeight}>
+				<Box width="100%" height={dimensions.paneHeight}>
 					<ApiKeyPrompt onApiKeySubmitted={handleApiKeySubmitted} />
 				</Box>
 			) : (
-				<Box width="100%" height={paneHeight}>
+				<Box width="100%" height={dimensions.paneHeight}>
 					<TerminalPane
 						isSelected={selectedPane === 'terminal'}
-						height={paneHeight}
-						totalCols={totalCols}
-						onPtyReady={pty => {
-							ptyRef.current = pty;
-							setTerminalExecutor(new PTYTerminalExecutor(pty));
-						}}
+						height={dimensions.paneHeight}
+						totalCols={dimensions.totalCols}
+						onPtyReady={handlePtyReady}
 						historyService={historyService.current}
 					/>
 					<PromptPane
 						isSelected={selectedPane === 'prompt'}
-						height={paneHeight}
+						height={dimensions.paneHeight}
 						onCommand={handleCommand}
 						historyService={historyService.current}
 						terminalExecutor={terminalExecutor || undefined}
@@ -118,7 +124,7 @@ const App = () => {
 			)}
 
 			{/* Status line */}
-			<Box width="100%" height={statusLineHeight}>
+			<Box width="100%" height={1}>
 				<Text dimColor>
 					{hasApiKey
 						? `shift + tab to switch to ${

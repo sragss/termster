@@ -54,11 +54,35 @@ After React DevTools starts up, you should see the component tree of your CLI. Y
 
 **Note**: You must manually quit your CLI via Ctrl+C after you're done testing.
 
+## Logging
+
+Termster generates debug and session logs in two locations:
+
+### 1. Session Logs (`~/.termster/logs/`)
+- **LLM Chat Sessions**: `session_YYYY-MM-DD_HH-MM-SS_xxx.log`
+  - Contains all LLM interactions, tool calls, approvals, and execution results
+  - Structured JSON logging with timestamps and severity levels
+  - Used for debugging LLM behavior and tool execution
+
+### 2. Terminal Session Logs (`~/.termster/logs/`)
+- **Terminal Sessions**: `terminal-session-YYYY-MM-DDTHH-MM-SS.log`
+  - Contains actual terminal commands and output (like shell history)
+  - Clean format without ANSI codes, timestamped commands
+  - Asynchronously buffered to prevent performance impact
+  - Used for reviewing terminal session history
+
+Both log types are stored in the same directory for easy access and debugging.
+
 # TODO
-- [ ] Save xterm-debug.log in ~/.termster/logs -- then allow the user to view it in the TUI if they want full history
-- [ ] Do the same for the chat log
+- [x] Save xterm-debug.log in ~/.termster/logs -- then allow the user to view it in the TUI if they want full history
+- [ ] Tune the the prompt so 4.1 does more without groveling
+- [ ] Do the same for the chat log  
 - [ ] Fix flickering / re-renders -- use react-devtools
 - [ ] Allow non-mutable terminal commands
 - [ ] Clearer CTA when needing user input
 - [ ] UX for handling prompts that are fired during tool execution
 - [ ] UX for canceling LLM execution
+- [ ] Bring back ctrl+C to terminal context
+- [ ] After one character of input, the cursor goes to a newline.
+- [ ] Exec tool call truncates too aggressively -- should have another tool that can read contents progressively
+- [ ] HistoryService is a POS, needs full refactor

@@ -13,7 +13,7 @@ const HeaderAnimation = ({height}: HeaderAnimationProps) => {
 
 	// Animated dots for "Initializing..."
 	useEffect(() => {
-		if (!isLoading) return;
+		if (!isLoading) return undefined;
 
 		const timer = setInterval(() => {
 			setDotCount(prev => (prev + 1) % 4); // 0, 1, 2, 3, then back to 0
@@ -24,7 +24,7 @@ const HeaderAnimation = ({height}: HeaderAnimationProps) => {
 
 	// Loading bar progress with easing
 	useEffect(() => {
-		if (!isLoading) return;
+		if (!isLoading) return undefined;
 
 		const duration = 1000; // 1 second
 		const frameRate = 16; // ~60fps

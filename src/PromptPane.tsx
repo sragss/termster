@@ -1,11 +1,11 @@
 import React, {useState, useCallback, useMemo} from 'react';
 import {Box, Text, useInput} from 'ink';
 import {grayScale, blueScale, whiteScale, redScale} from './colors.js';
-import ThinkingAnimation from './components/ThinkingAnimation.js';
 import {TerminalHistoryService} from './services/terminal-history.js';
 import {useLLMChat} from './hooks/useLLMChat.js';
 import {PATTERNS, UI} from './constants.js';
 import {TerminalExecutor} from './tools/mutable-execution.js';
+import ThinkingAnimation from './components/ThinkingAnimation.js';
 
 interface PromptPaneProps {
 	isSelected: boolean;
@@ -28,16 +28,16 @@ const PromptPane = ({
 		terminalExecutor,
 	});
 
-	// Simple viewport calculation like TerminalPane
-	const visibleLines = Math.max(5, height - 4); // Height minus borders and input line
+	// Memoize viewport calculations to prevent re-renders
+	const visibleLines = useMemo(() => Math.max(5, height - 4), [height]);
 	
 	// Get recent history entries that fit (same approach as TerminalPane)
 	const visibleHistory = useMemo(() => {
 		return history.slice(-visibleLines);
 	}, [history, visibleLines]);
 	
-	const hiddenCount = history.length - visibleHistory.length;
-	const hasMoreHistory = hiddenCount > 0;
+	const hiddenCount = useMemo(() => history.length - visibleHistory.length, [history.length, visibleHistory.length]);
+	const hasMoreHistory = useMemo(() => hiddenCount > 0, [hiddenCount]);
 
 	// Component to render tool calls with brand colors
 	const renderToolCallWithColors = useCallback((toolCallText: string) => {
@@ -62,10 +62,12 @@ const PromptPane = ({
 		);
 	}, []);
 
-	const formatTimestamp = useCallback(() => {
+	// Create a stable timestamp for the current input session
+	const [currentTimestamp] = useState(() => {
 		const now = new Date();
 		return now.toLocaleTimeString('en-US', UI.TIMESTAMP_FORMAT);
-	}, []);
+	});
+	
 
 	useInput((input, key) => {
 		if (!isSelected) return;
@@ -159,15 +161,15 @@ const PromptPane = ({
 			</Box>
 
 			{/* Current input line */}
-			<Box>
+			<Box width="100%">
 				{pendingApproval ? (
 					<Text wrap="wrap" color={blueScale.base}>
-						<Text dimColor>[{formatTimestamp()}] </Text>
+						<Text dimColor>[{currentTimestamp}] </Text>
 						Waiting for approval... [Enter=Yes, Esc=No]{isSelected && <Text inverse> </Text>}
 					</Text>
 				) : (
 					<Text wrap="wrap">
-						<Text dimColor>[{formatTimestamp()}] </Text>
+						<Text dimColor>[{currentTimestamp}] </Text>
 						<Text color={currentInput.startsWith('/') ? 'green' : 'white'}>
 							{currentInput}{isSelected && <Text inverse> </Text>}
 						</Text>
