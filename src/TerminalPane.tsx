@@ -4,6 +4,7 @@ import pty from 'node-pty';
 import xtermHeadless from '@xterm/headless';
 import addonSerialize from '@xterm/addon-serialize';
 import { grayScale, blueScale } from './colors.js';
+import { sanitizeTerminalOutput } from './terminal-sanitizer.js';
 import * as fs from 'fs/promises';
 
 const { Terminal } = xtermHeadless;
@@ -66,9 +67,10 @@ const TerminalPane = ({ isSelected, height, totalCols }: TerminalPaneProps) => {
       setTimeout(() => {
         try {
           const serialized = serializer.current.serialize();
+          const sanitized = sanitizeTerminalOutput(serialized);
           fs.appendFile('./xterm-debug.log', `SERIALIZED LENGTH: ${serialized.length}\n`).catch(console.error);
           fs.appendFile('./xterm-debug.log', `SERIALIZED CONTENT: ${JSON.stringify(serialized)}\n`).catch(console.error);
-          setFrame(serialized);
+          setFrame(sanitized);
         } catch (error) {
           fs.appendFile('./xterm-debug.log', `SERIALIZE ERROR: ${error}\n`).catch(console.error);
           setFrame('SERIALIZE ERROR');

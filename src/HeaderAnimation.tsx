@@ -64,7 +64,6 @@ const HeaderAnimation = ({ height }: HeaderAnimationProps) => {
       borderColor="red"
       justifyContent="center"
       padding={1}
-      marginBottom={1}
     >
       {isLoading ? (
         <Box flexDirection="column" alignItems="center">

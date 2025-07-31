@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Text, useInput, useStdout } from 'ink';
-// import HeaderAnimation from './HeaderAnimation.js';
+import HeaderAnimation from './HeaderAnimation.js';
 import TerminalPane from './TerminalPane.js';
 import NotesPane from './NotesPane.js';
 
@@ -13,7 +13,8 @@ const App = () => {
   const totalCols = stdout.columns || 80;
   const totalRows = stdout.rows - 2 || 24;
   const statusLineHeight = 1;
-  const availableHeight = totalRows - statusLineHeight;
+  const headerHeight = 8; // HeaderAnimation height
+  const availableHeight = totalRows - statusLineHeight - headerHeight;
   const paneHeight = availableHeight;
 
   useInput((input, key) => {
@@ -31,7 +32,7 @@ const App = () => {
 
   return (
     <Box width="100%" height={totalRows} flexDirection="column">
-      {/* <HeaderAnimation /> */}
+      <HeaderAnimation height={headerHeight} />
 
       <Box width="100%" height={paneHeight}>
         <TerminalPane 
