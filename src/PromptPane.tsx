@@ -3,6 +3,7 @@ import {Box, Text, useInput} from 'ink';
 import {grayScale, blueScale} from './colors.js';
 import {ChatLoop} from './services/llm.js';
 import {StreamingChatCallback} from './types/llm.js';
+import ThinkingAnimation from './components/ThinkingAnimation.js';
 
 interface CommandEntry {
 	command: string;
@@ -63,7 +64,7 @@ const PromptPane = ({
 					setCommandHistory(prev => [
 						...prev,
 						{command: currentInput, timestamp, type: 'text'},
-						{command: 'thinking...', timestamp, type: 'thinking'},
+						{command: '', timestamp, type: 'thinking'},
 					]);
 					
 					// Send to LLM
@@ -132,17 +133,20 @@ const PromptPane = ({
 				{commandHistory.map((entry, index) => (
 					<Box key={index} marginBottom={0}>
 						<Text dimColor>[{entry.timestamp}] </Text>
-						<Text
-							color={
-								entry.type === 'command' ? 'green' :
-								entry.type === 'assistant' ? 'blue' :
-								entry.type === 'thinking' ? 'yellow' :
-								'white'
-							}
-							wrap="wrap"
-						>
-							{entry.command}
-						</Text>
+						{entry.type === 'thinking' ? (
+							<ThinkingAnimation />
+						) : (
+							<Text
+								color={
+									entry.type === 'command' ? 'green' :
+									entry.type === 'assistant' ? blueScale.base :
+									'white'
+								}
+								wrap="wrap"
+							>
+								{entry.command}
+							</Text>
+						)}
 					</Box>
 				))}
 			</Box>
