@@ -5,6 +5,7 @@ import xtermHeadless from '@xterm/headless';
 import addonSerialize from '@xterm/addon-serialize';
 import {grayScale, blueScale} from './colors.js';
 import {sanitizeTerminalOutput} from './terminal-sanitizer.js';
+import {TerminalHistoryService} from './services/terminal-history.js';
 import * as fs from 'fs/promises';
 
 const {Terminal} = xtermHeadless;
@@ -15,6 +16,7 @@ interface TerminalPaneProps {
 	height: number;
 	totalCols: number;
 	onPtyReady?: (pty: pty.IPty) => void;
+	historyService?: TerminalHistoryService;
 }
 
 const TerminalPane = ({
@@ -22,6 +24,7 @@ const TerminalPane = ({
 	height,
 	totalCols,
 	onPtyReady,
+	historyService,
 }: TerminalPaneProps) => {
 	// Use passed-in dimensions instead of computing them
 	const cols = totalCols;
@@ -38,6 +41,11 @@ const TerminalPane = ({
 	const serializer = useRef(new SerializeAddon());
 	const [frame, setFrame] = useState('');
 	const ptyRef = useRef<pty.IPty | null>(null);
+	
+	// Command tracking for history
+	const currentCommand = useRef<string>('');
+	const commandOutput = useRef<string>('');
+	const awaitingCommand = useRef<boolean>(true);
 
 	// Memoize border color to prevent unnecessary layout changes
 	const borderColor = useMemo(() => {
@@ -82,6 +90,11 @@ const TerminalPane = ({
 				'./xterm-debug.log',
 				`PTY DATA: ${JSON.stringify(data)}\n`,
 			).catch(console.error);
+
+			// Track command output for history
+			if (historyService && !awaitingCommand.current) {
+				commandOutput.current += data;
+			}
 
 			term.current.write(data);
 
@@ -129,6 +142,34 @@ const TerminalPane = ({
 			'./xterm-debug.log',
 			`INPUT: ${JSON.stringify({input, key})}\n`,
 		).catch(console.error);
+
+		// Track commands for history
+		if (historyService) {
+			if (awaitingCommand.current) {
+				if (key.return) {
+					// Command submitted
+					awaitingCommand.current = false;
+					commandOutput.current = '';
+					
+					// Set a timeout to capture the command completion
+					setTimeout(() => {
+						if (currentCommand.current.trim()) {
+							historyService.addCommand(
+								currentCommand.current.trim(),
+								commandOutput.current.trim()
+							);
+						}
+						currentCommand.current = '';
+						commandOutput.current = '';
+						awaitingCommand.current = true;
+					}, 1000); // Wait 1 second for command output
+				} else if (key.backspace || key.delete) {
+					currentCommand.current = currentCommand.current.slice(0, -1);
+				} else if (input && input !== '\r' && input !== '\n') {
+					currentCommand.current += input;
+				}
+			}
+		}
 
 		// Handle arrow keys with proper escape sequences
 		if (key.upArrow) ptyRef.current.write('\u001b[A');

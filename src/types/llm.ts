@@ -21,9 +21,16 @@ export interface ChatService {
   clearHistory(): void;
 }
 
+export interface ToolCall {
+  id: string;
+  name: string;
+  args: Record<string, unknown>;
+}
+
 export interface StreamingChatCallback {
   onChunk?: (text: string) => void;
-  onComplete?: (message: string) => void;
+  onToolCall?: (toolCall: ToolCall) => Promise<string>;
+  onComplete?: (message: string) => void;  
   onError?: (error: Error) => void;
 }
 

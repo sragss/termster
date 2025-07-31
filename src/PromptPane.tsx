@@ -4,6 +4,7 @@ import {grayScale, blueScale} from './colors.js';
 import {ChatLoop} from './services/llm.js';
 import {StreamingChatCallback} from './types/llm.js';
 import ThinkingAnimation from './components/ThinkingAnimation.js';
+import {TerminalHistoryService} from './services/terminal-history.js';
 
 interface CommandEntry {
 	command: string;
@@ -15,12 +16,14 @@ interface PromptPaneProps {
 	isSelected: boolean;
 	height: number;
 	onCommand?: (command: string) => void;
+	historyService?: TerminalHistoryService;
 }
 
 const PromptPane = ({
 	isSelected,
 	height,
 	onCommand,
+	historyService,
 }: PromptPaneProps) => {
 	const [commandHistory, setCommandHistory] = useState<CommandEntry[]>([]);
 	const [currentInput, setCurrentInput] = useState('');
@@ -28,8 +31,8 @@ const PromptPane = ({
 	const chatService = useRef<ChatLoop | null>(null);
 
 	useEffect(() => {
-		chatService.current = new ChatLoop();
-	}, []);
+		chatService.current = new ChatLoop(historyService);
+	}, [historyService]);
 
 	const formatTimestamp = () => {
 		const now = new Date();
@@ -86,6 +89,16 @@ const PromptPane = ({
 		setIsLoading(true);
 		
 		const callbacks: StreamingChatCallback = {
+			onToolCall: async (toolCall) => {
+				if (chatService.current?.toolExecutor) {
+					const result = await chatService.current.toolExecutor.execute(
+						toolCall.name, 
+						toolCall.args
+					);
+					return result.success ? result.output : `Error: ${result.error}`;
+				}
+				return 'Tool execution not available';
+			},
 			onComplete: (message: string) => {
 				const timestamp = formatTimestamp();
 				setCommandHistory(prev => {

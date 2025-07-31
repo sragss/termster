@@ -4,8 +4,11 @@ import type {
   ResponseInputItem,
   Response as OpenAIResponse
 } from "openai/resources/responses/responses";
-import { ChatService, StreamingChatCallback } from '../types/llm.js';
+import { ChatService, StreamingChatCallback, ToolCall } from '../types/llm.js';
 import { ConfigService } from './config.js';
+import { ALL_TOOLS } from '../types/tools.js';
+import { TerminalToolExecutor } from './tools.js';
+import { TerminalHistoryService } from './terminal-history.js';
 
 export interface ModelConfig {
   model: string;
@@ -23,9 +26,13 @@ export class ChatLoop implements ChatService {
   private conversationHistory: ResponseInputItem[] = [];
   private lastResponseId?: string;
   private configService: ConfigService;
+  public toolExecutor?: TerminalToolExecutor;
 
-  constructor() {
+  constructor(historyService?: TerminalHistoryService) {
     this.configService = new ConfigService();
+    if (historyService) {
+      this.toolExecutor = new TerminalToolExecutor(historyService);
+    }
   }
 
   async initialize(): Promise<void> {
@@ -79,6 +86,8 @@ export class ChatLoop implements ChatService {
         input: input as any, // Type assertion for compatibility
         stream: false,
         parallel_tool_calls: false,
+        tools: this.toolExecutor ? ALL_TOOLS : undefined,
+        tool_choice: this.toolExecutor ? "auto" : undefined,
         store: true,
         previous_response_id: this.lastResponseId,
       } satisfies ResponseCreateParams);
@@ -104,6 +113,37 @@ export class ChatLoop implements ChatService {
   ): Promise<void> {
     this.lastResponseId = response.id;
     
+    // Process function calls if they exist
+    if (callbacks?.onToolCall && this.toolExecutor) {
+      const functionOutputs = await this.processFunctionCalls(response, callbacks.onToolCall);
+      
+      // If we had tool calls, we need to continue the conversation with tool results
+      if (functionOutputs.length > 0) {
+        // Make another API call with only the function outputs when using previous_response_id
+        const followupTimeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => {
+            reject(new Error(`Follow-up API call timed out after ${this.oai.timeout}ms`));
+          }, this.oai.timeout || 120000);
+        });
+
+        const followupApiPromise = this.oai.responses.create({
+          model: MODEL_CONFIG.model,
+          instructions: "You are a helpful assistant integrated into a terminal application. Continue the conversation with the tool results.",
+          input: functionOutputs as any, // Only send the function outputs
+          stream: false,
+          parallel_tool_calls: false,
+          tools: ALL_TOOLS,
+          tool_choice: "auto",
+          store: true,
+          previous_response_id: this.lastResponseId,
+        } satisfies ResponseCreateParams);
+
+        const followupResponse = await Promise.race([followupApiPromise, followupTimeoutPromise]) as any;
+        await this.handleNonStreamingResponse(followupResponse, callbacks);
+        return;
+      }
+    }
+    
     // Extract text content for callback
     for (const item of response.output) {
       if (item.type === 'message') {
@@ -119,6 +159,37 @@ export class ChatLoop implements ChatService {
         }
       }
     }
+  }
+
+  private async processFunctionCalls(
+    response: OpenAIResponse,
+    onToolCall: (toolCall: ToolCall) => Promise<string>
+  ): Promise<ResponseInputItem[]> {
+    const functionOutputs: ResponseInputItem[] = [];
+    
+    // Process all function calls from the response
+    for (const item of response.output) {
+      if (item.type === 'function_call') {
+        const toolCall: ToolCall = {
+          id: item.call_id,
+          name: item.name,
+          args: JSON.parse(item.arguments)
+        };
+
+        const output = await onToolCall(toolCall);
+
+        // Create tool result to send back to API
+        const toolResult: ResponseInputItem = {
+          type: "function_call_output",
+          call_id: item.call_id,
+          output: output
+        } as any;
+        
+        functionOutputs.push(toolResult);
+      }
+    }
+    
+    return functionOutputs;
   }
 
   getHistory(): ResponseInputItem[] {
