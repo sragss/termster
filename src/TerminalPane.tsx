@@ -30,6 +30,7 @@ const TerminalPane = ({
 	const cols = totalCols;
 	const rows = height;
 
+
 	// Internal flash error state (removed since arrow keys are now supported)
 	const term = useRef(
 		new Terminal({
@@ -42,10 +43,12 @@ const TerminalPane = ({
 	const [frame, setFrame] = useState('');
 	const ptyRef = useRef<pty.IPty | null>(null);
 
+
 	// Command tracking for history
 	const currentCommand = useRef<string>('');
 	const commandOutput = useRef<string>('');
 	const awaitingCommand = useRef<boolean>(true);
+
 
 	// Memoize border color to prevent unnecessary layout changes
 	const borderColor = useMemo(() => {
@@ -102,16 +105,29 @@ const TerminalPane = ({
 			setTimeout(() => {
 				try {
 					const serialized = serializer.current.serialize();
-					const sanitized = sanitizeTerminalOutput(serialized);
+					let sanitized = sanitizeTerminalOutput(serialized);
+					
+					// Use xterm's configured dimensions minus the Box padding
+					const lines = sanitized.split('\n');
+					const xtermRows = term.current.rows;
+					const visibleRows = xtermRows - 1; // Account for Box padding={1} at top
+					
 					fs.appendFile(
 						'./xterm-debug.log',
-						`SERIALIZED LENGTH: ${serialized.length}\n`,
+						`XTERM VIEWPORT: totalLines=${lines.length}, xtermRows=${xtermRows}, visibleRows=${visibleRows}, height=${height}\n`,
 					).catch(console.error);
-					fs.appendFile(
-						'./xterm-debug.log',
-						`SERIALIZED CONTENT: ${JSON.stringify(serialized)}\n`,
-					).catch(console.error);
+					
+					if (lines.length > visibleRows) {
+						const recentLines = lines.slice(-visibleRows);
+						sanitized = recentLines.join('\n');
+					}
+					
 					setFrame(sanitized);
+					
+					fs.appendFile(
+						'./xterm-debug.log',
+						`FRAME LENGTH: ${sanitized.length}, LINES: ${lines.length}\n`,
+					).catch(console.error);
 				} catch (error) {
 					fs.appendFile(
 						'./xterm-debug.log',
@@ -188,12 +204,6 @@ const TerminalPane = ({
 			'./xterm-debug.log',
 			`RENDER FRAME LENGTH: ${frame.length}\n`,
 		).catch(console.error);
-		if (frame.length < 200) {
-			fs.appendFile(
-				'./xterm-debug.log',
-				`RENDER FRAME: ${JSON.stringify(frame)}\n`,
-			).catch(console.error);
-		}
 	}, [frame]);
 
 	// Memoize the terminal content to prevent unnecessary re-renders

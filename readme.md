@@ -53,3 +53,10 @@ Ink supports React DevTools out-of-the-box. To enable integration with React Dev
 After React DevTools starts up, you should see the component tree of your CLI. You can inspect and change the props of components, and see the results immediately in the CLI, without restarting it.
 
 **Note**: You must manually quit your CLI via Ctrl+C after you're done testing.
+
+# TODO
+- [ ] Save xterm-debug.log in ~/.termster/logs -- then allow the user to view it in the TUI if they want full history
+- [ ] Do the same for the chat log
+- [ ] Fix flickering / re-renders
+- [ ] Allow non-mutable terminal commands
+- [ ] Clearer CTA when needing user input

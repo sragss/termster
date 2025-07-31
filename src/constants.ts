@@ -9,9 +9,16 @@ export const API_CONFIG = {
 
 // LLM Instructions
 export const LLM_INSTRUCTIONS = {
-	INITIAL:
-		'You are a helpful assistant integrated into a terminal application. Provide clear, concise responses to help the user with their questions and tasks.',
-	TOOL_FOLLOWUP: 'Continue the conversation with the tool results.',
+	INITIAL: `
+You are a helpful assistant integrated into a terminal application.
+When the user asks you to do things they imagine you're their intern on the keyboard.
+If they've affirmatively asked for something that can be provided by running tools against the terminal, do so.
+If you run into errors, try to fix them yourself, as a high agency intern would. 
+Provide clear, concise responses to help the user with their questions and tasks.
+`.trim(),
+	TOOL_FOLLOWUP: `
+Continue the conversation with the tool results.
+`.trim(),
 } as const;
 
 // Regex Patterns

@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useMemo} from 'react';
 import {Box, Text, useInput} from 'ink';
 import {grayScale, blueScale, whiteScale, redScale} from './colors.js';
 import ThinkingAnimation from './components/ThinkingAnimation.js';
@@ -27,6 +27,17 @@ const PromptPane = ({
 		historyService,
 		terminalExecutor,
 	});
+
+	// Simple viewport calculation like TerminalPane
+	const visibleLines = Math.max(5, height - 4); // Height minus borders and input line
+	
+	// Get recent history entries that fit (same approach as TerminalPane)
+	const visibleHistory = useMemo(() => {
+		return history.slice(-visibleLines);
+	}, [history, visibleLines]);
+	
+	const hiddenCount = history.length - visibleHistory.length;
+	const hasMoreHistory = hiddenCount > 0;
 
 	// Component to render tool calls with brand colors
 	const renderToolCallWithColors = useCallback((toolCallText: string) => {
@@ -106,8 +117,11 @@ const PromptPane = ({
 			flexDirection="column"
 		>
 			{/* Command history */}
-			<Box flexDirection="column" flexGrow={1}>
-				{history.map((entry, index) => (
+			<Box flexDirection="column" flexGrow={1} overflow="hidden">
+				{hasMoreHistory && (
+					<Text dimColor>⋮ ({hiddenCount} more entries above)</Text>
+				)}
+				{visibleHistory.map((entry, index) => (
 					<Box key={index} marginBottom={0}>
 						<Text dimColor>[{entry.timestamp}] </Text>
 						{entry.type === 'thinking' ? (
