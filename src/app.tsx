@@ -10,7 +10,6 @@ const App = () => {
 	const [selectedPane, setSelectedPane] = useState<'terminal' | 'prompt'>(
 		'terminal',
 	);
-	const [notesText, setNotesText] = useState('Your notes here...');
 	const ptyRef = useRef<pty.IPty | null>(null);
 
 	// Compute window dimensions upfront
@@ -26,6 +25,7 @@ const App = () => {
 			// Send a newline first to ensure we're on a fresh line
 			ptyRef.current.write('\r');
 			// Send the command
+			console.log('Sending command to terminal:', JSON.stringify(command));
 			ptyRef.current.write(command + '\r');
 		}
 	};
@@ -57,10 +57,8 @@ const App = () => {
 					}}
 				/>
 				<PromptPane
-					notesText={notesText}
 					isSelected={selectedPane === 'prompt'}
 					height={paneHeight}
-					onTextChange={setNotesText}
 					onCommand={handleCommand}
 				/>
 			</Box>

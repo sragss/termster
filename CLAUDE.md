@@ -63,3 +63,7 @@ Termster is a terminal emulator with split-pane functionality built using React 
 - ESM modules (`"type": "module"`)
 - Output compiled to `dist/` directory
 - CLI entry point: `dist/cli.js`
+
+## Debugging Notes
+
+- Remember to use xterm-debug.log to see what xterm is seeing
