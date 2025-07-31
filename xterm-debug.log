@@ -1,0 +1,109 @@
+XTERM DEBUG LOG
+=================
+Initial setup: cols=116, rows=78
+PTY spawned successfully
+RENDER FRAME LENGTH: 0
+RENDER FRAME: ""
+PTY DATA: "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                   \r \r"
+SERIALIZED LENGTH: 0
+SERIALIZED CONTENT: ""
+PTY DATA: "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[36m~/Documents/Code/sragss/termster\u001b[39m\u001b[33m (main)\u001b[39m % \u001b[K\u001b[?2004h"
+SERIALIZED LENGTH: 122
+SERIALIZED CONTENT: "                                                                                                                    \u001b[116D"
+RENDER FRAME LENGTH: 122
+RENDER FRAME: "                                                                                                                    \u001b[116D"
+INPUT: {"input":"","key":{"upArrow":false,"downArrow":false,"leftArrow":false,"rightArrow":false,"pageDown":false,"pageUp":false,"return":false,"escape":false,"ctrl":false,"shift":true,"tab":true,"backspace":false,"delete":false,"meta":false}}
+PTY DATA: "      "
+SERIALIZED LENGTH: 64
+SERIALIZED CONTENT: "\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m % \u001b[?2004h"
+RENDER FRAME LENGTH: 64
+RENDER FRAME: "\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m % \u001b[?2004h"
+INPUT: {"input":"l","key":{"upArrow":false,"downArrow":false,"leftArrow":false,"rightArrow":false,"pageDown":false,"pageUp":false,"return":false,"escape":false,"ctrl":false,"shift":false,"tab":false,"backspace":false,"delete":false,"meta":false}}
+PTY DATA: "l"
+SERIALIZED LENGTH: 70
+SERIALIZED CONTENT: "\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m %       \u001b[?2004h"
+RENDER FRAME LENGTH: 70
+RENDER FRAME: "\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m %       \u001b[?2004h"
+INPUT: {"input":"s","key":{"upArrow":false,"downArrow":false,"leftArrow":false,"rightArrow":false,"pageDown":false,"pageUp":false,"return":false,"escape":false,"ctrl":false,"shift":false,"tab":false,"backspace":false,"delete":false,"meta":false}}
+PTY DATA: "s"
+SERIALIZED LENGTH: 71
+SERIALIZED CONTENT: "\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m %       l\u001b[?2004h"
+RENDER FRAME LENGTH: 71
+RENDER FRAME: "\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m %       l\u001b[?2004h"
+INPUT: {"input":"\r","key":{"upArrow":false,"downArrow":false,"leftArrow":false,"rightArrow":false,"pageDown":false,"pageUp":false,"return":true,"escape":false,"ctrl":false,"shift":false,"tab":false,"backspace":false,"delete":false,"meta":false}}
+PTY DATA: "\u001b[?2004l\r\r\n"
+SERIALIZED LENGTH: 72
+SERIALIZED CONTENT: "\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m %       ls\u001b[?2004h"
+RENDER FRAME LENGTH: 72
+RENDER FRAME: "\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m %       ls\u001b[?2004h"
+PTY DATA: "CLAUDE.md\t\tpackage-lock.json\treadme.md\t\ttsconfig.json\r\ndist\t\t\tpackage.json\t\tsrc\t\t\txterm-debug.log\r\nnode_modules\t\tpty-debug.log\t\ttest.tsx\r\n"
+SERIALIZED LENGTH: 73
+SERIALIZED CONTENT: "\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m %       ls\u001b[1B\u001b[50D"
+RENDER FRAME LENGTH: 73
+RENDER FRAME: "\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m %       ls\u001b[1B\u001b[50D"
+PTY DATA: "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                   \r \r"
+SERIALIZED LENGTH: 233
+SERIALIZED CONTENT: "\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m %       ls\r\nCLAUDE.md\u001b[15Cpackage-lock.json\u001b[7Creadme.md\u001b[15Ctsconfig.json\r\ndist\u001b[20Cpackage.json\u001b[12Csrc\u001b[21Cxterm-debug.log\r\nnode_modules\u001b[12Cpty-debug.log\u001b[11Ctest.tsx\u001b[1B\u001b[56D"
+RENDER FRAME LENGTH: 233
+PTY DATA: "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[36m~/Documents/Code/sragss/termster\u001b[39m\u001b[33m (main)\u001b[39m % \u001b[K\u001b[?2004h"
+SERIALIZED LENGTH: 348
+SERIALIZED CONTENT: "\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m %       ls\r\nCLAUDE.md\u001b[15Cpackage-lock.json\u001b[7Creadme.md\u001b[15Ctsconfig.json\r\ndist\u001b[20Cpackage.json\u001b[12Csrc\u001b[21Cxterm-debug.log\r\nnode_modules\u001b[12Cpty-debug.log\u001b[11Ctest.tsx\r\n                                                                                                                    \u001b[116D"
+RENDER FRAME LENGTH: 348
+INPUT: {"input":"l","key":{"upArrow":false,"downArrow":false,"leftArrow":false,"rightArrow":false,"pageDown":false,"pageUp":false,"return":false,"escape":false,"ctrl":false,"shift":false,"tab":false,"backspace":false,"delete":false,"meta":false}}
+PTY DATA: "l"
+SERIALIZED LENGTH: 290
+SERIALIZED CONTENT: "\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m %       ls\r\nCLAUDE.md\u001b[15Cpackage-lock.json\u001b[7Creadme.md\u001b[15Ctsconfig.json\r\ndist\u001b[20Cpackage.json\u001b[12Csrc\u001b[21Cxterm-debug.log\r\nnode_modules\u001b[12Cpty-debug.log\u001b[11Ctest.tsx\r\n\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m % \u001b[?2004h"
+RENDER FRAME LENGTH: 290
+INPUT: {"input":"s","key":{"upArrow":false,"downArrow":false,"leftArrow":false,"rightArrow":false,"pageDown":false,"pageUp":false,"return":false,"escape":false,"ctrl":false,"shift":false,"tab":false,"backspace":false,"delete":false,"meta":false}}
+PTY DATA: "\bls"
+SERIALIZED LENGTH: 291
+SERIALIZED CONTENT: "\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m %       ls\r\nCLAUDE.md\u001b[15Cpackage-lock.json\u001b[7Creadme.md\u001b[15Ctsconfig.json\r\ndist\u001b[20Cpackage.json\u001b[12Csrc\u001b[21Cxterm-debug.log\r\nnode_modules\u001b[12Cpty-debug.log\u001b[11Ctest.tsx\r\n\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m % l\u001b[?2004h"
+RENDER FRAME LENGTH: 291
+INPUT: {"input":"\r","key":{"upArrow":false,"downArrow":false,"leftArrow":false,"rightArrow":false,"pageDown":false,"pageUp":false,"return":true,"escape":false,"ctrl":false,"shift":false,"tab":false,"backspace":false,"delete":false,"meta":false}}
+PTY DATA: "\u001b[?2004l\r\r\n"
+SERIALIZED LENGTH: 292
+SERIALIZED CONTENT: "\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m %       ls\r\nCLAUDE.md\u001b[15Cpackage-lock.json\u001b[7Creadme.md\u001b[15Ctsconfig.json\r\ndist\u001b[20Cpackage.json\u001b[12Csrc\u001b[21Cxterm-debug.log\r\nnode_modules\u001b[12Cpty-debug.log\u001b[11Ctest.tsx\r\n\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m % ls\u001b[?2004h"
+RENDER FRAME LENGTH: 292
+PTY DATA: "CLAUDE.md\t\tpackage-lock.json\treadme.md\t\ttsconfig.json\r\ndist\t\t\tpackage.json\t\tsrc\t\t\txterm-debug.log\r\nnode_modules\t\tpty-debug.log\t\ttest.tsx\r\n"
+SERIALIZED LENGTH: 293
+SERIALIZED CONTENT: "\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m %       ls\r\nCLAUDE.md\u001b[15Cpackage-lock.json\u001b[7Creadme.md\u001b[15Ctsconfig.json\r\ndist\u001b[20Cpackage.json\u001b[12Csrc\u001b[21Cxterm-debug.log\r\nnode_modules\u001b[12Cpty-debug.log\u001b[11Ctest.tsx\r\n\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m % ls\u001b[1B\u001b[44D"
+RENDER FRAME LENGTH: 293
+PTY DATA: "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                   \r \r"
+SERIALIZED LENGTH: 453
+SERIALIZED CONTENT: "\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m %       ls\r\nCLAUDE.md\u001b[15Cpackage-lock.json\u001b[7Creadme.md\u001b[15Ctsconfig.json\r\ndist\u001b[20Cpackage.json\u001b[12Csrc\u001b[21Cxterm-debug.log\r\nnode_modules\u001b[12Cpty-debug.log\u001b[11Ctest.tsx\r\n\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m % ls\r\nCLAUDE.md\u001b[15Cpackage-lock.json\u001b[7Creadme.md\u001b[15Ctsconfig.json\r\ndist\u001b[20Cpackage.json\u001b[12Csrc\u001b[21Cxterm-debug.log\r\nnode_modules\u001b[12Cpty-debug.log\u001b[11Ctest.tsx\u001b[1B\u001b[56D"
+RENDER FRAME LENGTH: 453
+PTY DATA: "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[36m~/Documents/Code/sragss/termster\u001b[39m\u001b[33m (main)\u001b[39m % \u001b[K\u001b[?2004h"
+SERIALIZED LENGTH: 568
+SERIALIZED CONTENT: "\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m %       ls\r\nCLAUDE.md\u001b[15Cpackage-lock.json\u001b[7Creadme.md\u001b[15Ctsconfig.json\r\ndist\u001b[20Cpackage.json\u001b[12Csrc\u001b[21Cxterm-debug.log\r\nnode_modules\u001b[12Cpty-debug.log\u001b[11Ctest.tsx\r\n\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m % ls\r\nCLAUDE.md\u001b[15Cpackage-lock.json\u001b[7Creadme.md\u001b[15Ctsconfig.json\r\ndist\u001b[20Cpackage.json\u001b[12Csrc\u001b[21Cxterm-debug.log\r\nnode_modules\u001b[12Cpty-debug.log\u001b[11Ctest.tsx\r\n                                                                                                                    \u001b[116D"
+RENDER FRAME LENGTH: 568
+INPUT: {"input":"l","key":{"upArrow":false,"downArrow":false,"leftArrow":false,"rightArrow":false,"pageDown":false,"pageUp":false,"return":false,"escape":false,"ctrl":false,"shift":false,"tab":false,"backspace":false,"delete":false,"meta":false}}
+PTY DATA: "l"
+SERIALIZED LENGTH: 510
+SERIALIZED CONTENT: "\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m %       ls\r\nCLAUDE.md\u001b[15Cpackage-lock.json\u001b[7Creadme.md\u001b[15Ctsconfig.json\r\ndist\u001b[20Cpackage.json\u001b[12Csrc\u001b[21Cxterm-debug.log\r\nnode_modules\u001b[12Cpty-debug.log\u001b[11Ctest.tsx\r\n\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m % ls\r\nCLAUDE.md\u001b[15Cpackage-lock.json\u001b[7Creadme.md\u001b[15Ctsconfig.json\r\ndist\u001b[20Cpackage.json\u001b[12Csrc\u001b[21Cxterm-debug.log\r\nnode_modules\u001b[12Cpty-debug.log\u001b[11Ctest.tsx\r\n\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m % \u001b[?2004h"
+RENDER FRAME LENGTH: 510
+INPUT: {"input":"s","key":{"upArrow":false,"downArrow":false,"leftArrow":false,"rightArrow":false,"pageDown":false,"pageUp":false,"return":false,"escape":false,"ctrl":false,"shift":false,"tab":false,"backspace":false,"delete":false,"meta":false}}
+PTY DATA: "\bls"
+SERIALIZED LENGTH: 511
+SERIALIZED CONTENT: "\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m %       ls\r\nCLAUDE.md\u001b[15Cpackage-lock.json\u001b[7Creadme.md\u001b[15Ctsconfig.json\r\ndist\u001b[20Cpackage.json\u001b[12Csrc\u001b[21Cxterm-debug.log\r\nnode_modules\u001b[12Cpty-debug.log\u001b[11Ctest.tsx\r\n\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m % ls\r\nCLAUDE.md\u001b[15Cpackage-lock.json\u001b[7Creadme.md\u001b[15Ctsconfig.json\r\ndist\u001b[20Cpackage.json\u001b[12Csrc\u001b[21Cxterm-debug.log\r\nnode_modules\u001b[12Cpty-debug.log\u001b[11Ctest.tsx\r\n\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m % l\u001b[?2004h"
+RENDER FRAME LENGTH: 511
+INPUT: {"input":"\r","key":{"upArrow":false,"downArrow":false,"leftArrow":false,"rightArrow":false,"pageDown":false,"pageUp":false,"return":true,"escape":false,"ctrl":false,"shift":false,"tab":false,"backspace":false,"delete":false,"meta":false}}
+PTY DATA: "\u001b[?2004l"
+SERIALIZED LENGTH: 512
+SERIALIZED CONTENT: "\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m %       ls\r\nCLAUDE.md\u001b[15Cpackage-lock.json\u001b[7Creadme.md\u001b[15Ctsconfig.json\r\ndist\u001b[20Cpackage.json\u001b[12Csrc\u001b[21Cxterm-debug.log\r\nnode_modules\u001b[12Cpty-debug.log\u001b[11Ctest.tsx\r\n\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m % ls\r\nCLAUDE.md\u001b[15Cpackage-lock.json\u001b[7Creadme.md\u001b[15Ctsconfig.json\r\ndist\u001b[20Cpackage.json\u001b[12Csrc\u001b[21Cxterm-debug.log\r\nnode_modules\u001b[12Cpty-debug.log\u001b[11Ctest.tsx\r\n\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m % ls\u001b[?2004h"
+RENDER FRAME LENGTH: 512
+PTY DATA: "\r\r\n"
+SERIALIZED LENGTH: 504
+SERIALIZED CONTENT: "\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m %       ls\r\nCLAUDE.md\u001b[15Cpackage-lock.json\u001b[7Creadme.md\u001b[15Ctsconfig.json\r\ndist\u001b[20Cpackage.json\u001b[12Csrc\u001b[21Cxterm-debug.log\r\nnode_modules\u001b[12Cpty-debug.log\u001b[11Ctest.tsx\r\n\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m % ls\r\nCLAUDE.md\u001b[15Cpackage-lock.json\u001b[7Creadme.md\u001b[15Ctsconfig.json\r\ndist\u001b[20Cpackage.json\u001b[12Csrc\u001b[21Cxterm-debug.log\r\nnode_modules\u001b[12Cpty-debug.log\u001b[11Ctest.tsx\r\n\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m % ls"
+RENDER FRAME LENGTH: 504
+PTY DATA: "CLAUDE.md\t\tpackage-lock.json\treadme.md\t\ttsconfig.json\r\ndist\t\t\tpackage.json\t\tsrc\t\t\txterm-debug.log\r\nnode_modules\t\tpty-debug.log\t\ttest.tsx\r\n"
+SERIALIZED LENGTH: 513
+SERIALIZED CONTENT: "\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m %       ls\r\nCLAUDE.md\u001b[15Cpackage-lock.json\u001b[7Creadme.md\u001b[15Ctsconfig.json\r\ndist\u001b[20Cpackage.json\u001b[12Csrc\u001b[21Cxterm-debug.log\r\nnode_modules\u001b[12Cpty-debug.log\u001b[11Ctest.tsx\r\n\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m % ls\r\nCLAUDE.md\u001b[15Cpackage-lock.json\u001b[7Creadme.md\u001b[15Ctsconfig.json\r\ndist\u001b[20Cpackage.json\u001b[12Csrc\u001b[21Cxterm-debug.log\r\nnode_modules\u001b[12Cpty-debug.log\u001b[11Ctest.tsx\r\n\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m % ls\u001b[1B\u001b[44D"
+RENDER FRAME LENGTH: 513
+PTY DATA: "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                   \r \r"
+SERIALIZED LENGTH: 673
+SERIALIZED CONTENT: "\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m %       ls\r\nCLAUDE.md\u001b[15Cpackage-lock.json\u001b[7Creadme.md\u001b[15Ctsconfig.json\r\ndist\u001b[20Cpackage.json\u001b[12Csrc\u001b[21Cxterm-debug.log\r\nnode_modules\u001b[12Cpty-debug.log\u001b[11Ctest.tsx\r\n\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m % ls\r\nCLAUDE.md\u001b[15Cpackage-lock.json\u001b[7Creadme.md\u001b[15Ctsconfig.json\r\ndist\u001b[20Cpackage.json\u001b[12Csrc\u001b[21Cxterm-debug.log\r\nnode_modules\u001b[12Cpty-debug.log\u001b[11Ctest.tsx\r\n\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m % ls\r\nCLAUDE.md\u001b[15Cpackage-lock.json\u001b[7Creadme.md\u001b[15Ctsconfig.json\r\ndist\u001b[20Cpackage.json\u001b[12Csrc\u001b[21Cxterm-debug.log\r\nnode_modules\u001b[12Cpty-debug.log\u001b[11Ctest.tsx\u001b[1B\u001b[56D"
+RENDER FRAME LENGTH: 673
+PTY DATA: "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[36m~/Documents/Code/sragss/termster\u001b[39m\u001b[33m (main)\u001b[39m % \u001b[K\u001b[?2004h"
+SERIALIZED LENGTH: 788
+SERIALIZED CONTENT: "\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m %       ls\r\nCLAUDE.md\u001b[15Cpackage-lock.json\u001b[7Creadme.md\u001b[15Ctsconfig.json\r\ndist\u001b[20Cpackage.json\u001b[12Csrc\u001b[21Cxterm-debug.log\r\nnode_modules\u001b[12Cpty-debug.log\u001b[11Ctest.tsx\r\n\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m % ls\r\nCLAUDE.md\u001b[15Cpackage-lock.json\u001b[7Creadme.md\u001b[15Ctsconfig.json\r\ndist\u001b[20Cpackage.json\u001b[12Csrc\u001b[21Cxterm-debug.log\r\nnode_modules\u001b[12Cpty-debug.log\u001b[11Ctest.tsx\r\n\u001b[36m~/Documents/Code/sragss/termster\u001b[33m (main)\u001b[0m % ls\r\nCLAUDE.md\u001b[15Cpackage-lock.json\u001b[7Creadme.md\u001b[15Ctsconfig.json\r\ndist\u001b[20Cpackage.json\u001b[12Csrc\u001b[21Cxterm-debug.log\r\nnode_modules\u001b[12Cpty-debug.log\u001b[11Ctest.tsx\r\n                                                                                                                    \u001b[116D"
+RENDER FRAME LENGTH: 788
