@@ -41,7 +41,7 @@ const TerminalPane = ({
 	const serializer = useRef(new SerializeAddon());
 	const [frame, setFrame] = useState('');
 	const ptyRef = useRef<pty.IPty | null>(null);
-	
+
 	// Command tracking for history
 	const currentCommand = useRef<string>('');
 	const commandOutput = useRef<string>('');
@@ -150,13 +150,13 @@ const TerminalPane = ({
 					// Command submitted
 					awaitingCommand.current = false;
 					commandOutput.current = '';
-					
+
 					// Set a timeout to capture the command completion
 					setTimeout(() => {
 						if (currentCommand.current.trim()) {
 							historyService.addCommand(
 								currentCommand.current.trim(),
-								commandOutput.current.trim()
+								commandOutput.current.trim(),
 							);
 						}
 						currentCommand.current = '';

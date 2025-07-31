@@ -21,7 +21,6 @@ const ApiKeyPrompt = ({onApiKeySubmitted}: ApiKeyPromptProps) => {
 			setRedirectAttempted(true);
 			openAuthUrl();
 		}
-
 	}, [redirectAttempted]);
 
 	const openAuthUrl = async () => {
@@ -45,7 +44,7 @@ const ApiKeyPrompt = ({onApiKeySubmitted}: ApiKeyPromptProps) => {
 		}
 
 		try {
-			spawn(command, args, { stdio: 'ignore' });
+			spawn(command, args, {stdio: 'ignore'});
 		} catch (error) {
 			// Silently fail if browser can't be opened
 		}
@@ -56,11 +55,13 @@ const ApiKeyPrompt = ({onApiKeySubmitted}: ApiKeyPromptProps) => {
 			if (input.trim()) {
 				// Basic validation
 				if (!input.startsWith('echo_')) {
-					setError('Invalid API key format. Echo API keys should start with "echo_".');
+					setError(
+						'Invalid API key format. Echo API keys should start with "echo_".',
+					);
 					setInput('');
 					return;
 				}
-				
+
 				setError('');
 				onApiKeySubmitted(input.trim());
 			}
@@ -77,7 +78,9 @@ const ApiKeyPrompt = ({onApiKeySubmitted}: ApiKeyPromptProps) => {
 		<Box flexDirection="column" padding={2}>
 			{/* Header */}
 			<Box marginBottom={2}>
-				<Text bold color={blueScale.base}>🔑 API Key Required</Text>
+				<Text bold color={blueScale.base}>
+					🔑 API Key Required
+				</Text>
 			</Box>
 
 			{/* Error message */}

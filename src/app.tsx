@@ -16,7 +16,9 @@ const App = () => {
 	const [hasApiKey, setHasApiKey] = useState<boolean | null>(null); // null = loading
 	const ptyRef = useRef<pty.IPty | null>(null);
 	const configService = useRef<ConfigService>(new ConfigService());
-	const historyService = useRef<TerminalHistoryService>(new TerminalHistoryService());
+	const historyService = useRef<TerminalHistoryService>(
+		new TerminalHistoryService(),
+	);
 
 	// Check for API key on mount
 	useEffect(() => {
@@ -80,7 +82,12 @@ const App = () => {
 
 			{/* Show API key prompt if needed, otherwise show main app */}
 			{hasApiKey === null ? (
-				<Box width="100%" height={paneHeight} justifyContent="center" alignItems="center">
+				<Box
+					width="100%"
+					height={paneHeight}
+					justifyContent="center"
+					alignItems="center"
+				>
 					<Text>Loading...</Text>
 				</Box>
 			) : hasApiKey === false ? (
@@ -110,13 +117,11 @@ const App = () => {
 			{/* Status line */}
 			<Box width="100%" height={statusLineHeight}>
 				<Text dimColor>
-					{hasApiKey ? (
-						`shift + tab to switch to ${
-							selectedPane === 'terminal' ? 'prompt' : 'terminal'
-						}`
-					) : (
-						'Enter your Echo API key to continue'
-					)}
+					{hasApiKey
+						? `shift + tab to switch to ${
+								selectedPane === 'terminal' ? 'prompt' : 'terminal'
+						  }`
+						: 'Enter your Echo API key to continue'}
 				</Text>
 			</Box>
 		</Box>
