@@ -9,7 +9,7 @@
 	},
 	"scripts": {
 		"build": "tsc",
-		"dev": "tsc --watch",
+		"start": "npm run build && termster",
 		"devtools": "npm run build && DEV=true termster",
 		"test": "prettier --check . && xo && ava"
 	},

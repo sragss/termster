@@ -1,3 +1,5 @@
 node_modules
 dist
 pty-debug.log
+.DS_Store
+*.swp

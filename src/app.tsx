@@ -11,7 +11,7 @@ const App = () => {
 
   // Compute window dimensions upfront
   const totalCols = stdout.columns || 80;
-  const totalRows = stdout.rows || 24;
+  const totalRows = stdout.rows - 2 || 24;
   const statusLineHeight = 1;
   const availableHeight = totalRows - statusLineHeight;
   const paneHeight = availableHeight;
