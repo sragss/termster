@@ -1,8 +1,8 @@
 export const colors = {
 	// Gray Scale
 	grayScale: {
-		xlight: 'rgb(76, 76, 76)',
-		light: 'rgb(51, 51, 51)',
+		xlight: 'rgb(120, 120, 120)', // lighter than before
+		light: 'rgb(90, 90, 90)', // lighter than before
 		base: 'rgb(35, 35, 35)',
 		dark: 'rgb(20, 20, 20)',
 		xdark: 'rgb(0, 0, 0)',

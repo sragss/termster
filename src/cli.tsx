@@ -31,8 +31,4 @@ if (process.stdout.isTTY) {
 	process.stdout.write('\u001b[2J\u001b[0;0H');
 }
 
-render(
-	<React.StrictMode>
-		<App />
-	</React.StrictMode>,
-);
+render(<App />);

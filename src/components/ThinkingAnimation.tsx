@@ -14,11 +14,7 @@ const ThinkingAnimation = () => {
 		return () => clearInterval(interval);
 	}, []);
 
-	return (
-		<Text color={blueScale.light}>
-			{frames[frame]} thinking...
-		</Text>
-	);
+	return <Text color={blueScale.light}>{frames[frame]} thinking...</Text>;
 };
 
 export default ThinkingAnimation;

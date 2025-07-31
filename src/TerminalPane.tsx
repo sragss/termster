@@ -6,7 +6,8 @@ import addonSerialize from '@xterm/addon-serialize';
 import {grayScale, blueScale} from './colors.js';
 import {sanitizeTerminalOutput} from './terminal-sanitizer.js';
 import {TerminalHistoryService} from './services/terminal-history.js';
-import * as fs from 'fs/promises';
+import {xtermSessionLogger} from './services/xterm-logger.js';
+import {Logger} from './services/logger.js';
 
 const {Terminal} = xtermHeadless;
 const {SerializeAddon} = addonSerialize;
@@ -30,6 +31,7 @@ const TerminalPane = ({
 	const cols = totalCols;
 	const rows = height;
 
+
 	// Internal flash error state (removed since arrow keys are now supported)
 	const term = useRef(
 		new Terminal({
@@ -41,32 +43,29 @@ const TerminalPane = ({
 	const serializer = useRef(new SerializeAddon());
 	const [frame, setFrame] = useState('');
 	const ptyRef = useRef<pty.IPty | null>(null);
-	
+
+
 	// Command tracking for history
 	const currentCommand = useRef<string>('');
 	const commandOutput = useRef<string>('');
 	const awaitingCommand = useRef<boolean>(true);
+
 
 	// Memoize border color to prevent unnecessary layout changes
 	const borderColor = useMemo(() => {
 		return isSelected ? blueScale.base : grayScale.light;
 	}, [isSelected]);
 
+
 	// Initial mount
 	useEffect(() => {
-		// Clear debug logs
-		fs.writeFile(
-			'./xterm-debug.log',
-			'XTERM DEBUG LOG\n=================\n',
-		).catch(console.error);
+		// Initialize session logger
+		xtermSessionLogger.initialize();
 
 		const termCols = Math.floor(cols / 2) - 4;
 		const termRows = rows - 2; // Account for border and padding
 
-		fs.appendFile(
-			'./xterm-debug.log',
-			`Initial setup: cols=${termCols}, rows=${termRows}\n`,
-		).catch(console.error);
+		Logger.info('Terminal pane initialized', { cols: termCols, rows: termRows });
 
 		term.current.loadAddon(serializer.current);
 		ptyRef.current = pty.spawn('zsh', [], {
@@ -75,9 +74,7 @@ const TerminalPane = ({
 			rows: termRows,
 		});
 
-		fs.appendFile('./xterm-debug.log', `PTY spawned successfully\n`).catch(
-			console.error,
-		);
+		Logger.info('PTY spawned successfully');
 
 		// Notify parent component that PTY is ready
 		if (onPtyReady && ptyRef.current) {
@@ -86,10 +83,8 @@ const TerminalPane = ({
 
 		// Pipe PTY → xterm
 		ptyRef.current.onData(data => {
-			fs.appendFile(
-				'./xterm-debug.log',
-				`PTY DATA: ${JSON.stringify(data)}\n`,
-			).catch(console.error);
+			// Log raw terminal output to session log (like shell history)
+			xtermSessionLogger.logOutput(data);
 
 			// Track command output for history
 			if (historyService && !awaitingCommand.current) {
@@ -98,32 +93,38 @@ const TerminalPane = ({
 
 			term.current.write(data);
 
-			// Use setTimeout to ensure xterm has processed the data before serializing
+			// Let React handle the updates efficiently
 			setTimeout(() => {
 				try {
 					const serialized = serializer.current.serialize();
-					const sanitized = sanitizeTerminalOutput(serialized);
-					fs.appendFile(
-						'./xterm-debug.log',
-						`SERIALIZED LENGTH: ${serialized.length}\n`,
-					).catch(console.error);
-					fs.appendFile(
-						'./xterm-debug.log',
-						`SERIALIZED CONTENT: ${JSON.stringify(serialized)}\n`,
-					).catch(console.error);
+					let sanitized = sanitizeTerminalOutput(serialized);
+					
+					// Use xterm's configured dimensions minus UI overhead
+					const lines = sanitized.split('\n');
+					const xtermRows = term.current.rows;
+					const uiOffset = 4;
+					const visibleRows = xtermRows - uiOffset;
+					
+					if (lines.length > visibleRows) {
+						const recentLines = lines.slice(-visibleRows);
+						sanitized = recentLines.join('\n');
+					}
+					
 					setFrame(sanitized);
 				} catch (error) {
-					fs.appendFile(
-						'./xterm-debug.log',
-						`SERIALIZE ERROR: ${error}\n`,
-					).catch(console.error);
+					Logger.error('Terminal serialization error', { 
+						error: error instanceof Error ? error.message : String(error) 
+					});
 					setFrame('SERIALIZE ERROR');
 				}
 			}, 0);
 		});
 
 		// Cleanup
-		return () => ptyRef.current?.kill();
+		return () => {
+			ptyRef.current?.kill();
+			xtermSessionLogger.shutdown();
+		};
 	}, []);
 
 	// Window resize
@@ -138,25 +139,32 @@ const TerminalPane = ({
 	useInput((input, key) => {
 		if (!isSelected || !ptyRef.current) return;
 
-		fs.appendFile(
-			'./xterm-debug.log',
-			`INPUT: ${JSON.stringify({input, key})}\n`,
-		).catch(console.error);
+		// Log input for system debugging (only special keys)
+		if (key.ctrl || key.meta || key.return) {
+			Logger.debug('Terminal input', { 
+				input, 
+				key: Object.keys(key).filter(k => key[k as keyof typeof key]) 
+			});
+		}
 
 		// Track commands for history
 		if (historyService) {
 			if (awaitingCommand.current) {
 				if (key.return) {
-					// Command submitted
+					// Command submitted - log to session
+					if (currentCommand.current.trim()) {
+						xtermSessionLogger.logCommand(currentCommand.current.trim());
+					}
+					
 					awaitingCommand.current = false;
 					commandOutput.current = '';
-					
+
 					// Set a timeout to capture the command completion
 					setTimeout(() => {
 						if (currentCommand.current.trim()) {
 							historyService.addCommand(
 								currentCommand.current.trim(),
-								commandOutput.current.trim()
+								commandOutput.current.trim(),
 							);
 						}
 						currentCommand.current = '';
@@ -182,19 +190,7 @@ const TerminalPane = ({
 		else if (input) ptyRef.current.write(input);
 	});
 
-	// Log current frame for debugging
-	useEffect(() => {
-		fs.appendFile(
-			'./xterm-debug.log',
-			`RENDER FRAME LENGTH: ${frame.length}\n`,
-		).catch(console.error);
-		if (frame.length < 200) {
-			fs.appendFile(
-				'./xterm-debug.log',
-				`RENDER FRAME: ${JSON.stringify(frame)}\n`,
-			).catch(console.error);
-		}
-	}, [frame]);
+	// Remove frame logging - not needed for session logging
 
 	// Memoize the terminal content to prevent unnecessary re-renders
 	const memoizedContent = useMemo(() => {
