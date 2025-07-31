@@ -25,6 +25,15 @@ export const colors = {
     dark: 'rgb(177, 178, 175)',
     xdark: 'rgb(140, 140, 140)',
   },
+
+  // Red Scale for explosion effects
+  redScale: {
+    xlight: 'rgb(255, 102, 102)',
+    light: 'rgb(255, 51, 51)',
+    base: 'rgb(255, 0, 0)',
+    dark: 'rgb(204, 0, 0)',
+    xdark: 'rgb(153, 0, 0)',
+  },
 } as const;
 
 // Convenience exports for commonly used colors
@@ -32,4 +41,5 @@ export const {
   grayScale,
   blueScale,
   whiteScale,
+  redScale,
 } = colors;

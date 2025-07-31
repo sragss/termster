@@ -3,11 +3,17 @@
  * Removes problematic control characters while preserving ANSI colors
  */
 
-export function sanitizeTerminalOutput(data: string, previousOutput: string = ''): { cleanData: string, newOutput: string } {
+export function sanitizeTerminalOutput(data: string, previousOutput: string = ''): { cleanData: string, newOutput: string, shouldClear: boolean } {
   let cleanData = data;
+  let shouldClear = false;
+  
+  // Check for clear screen commands
+  if (cleanData.includes('\x1b[2J') || cleanData.includes('\x1b[H\x1b[2J')) {
+    shouldClear = true;
+  }
   
   // Remove cursor positioning, clearing, and mode changes (but keep colors)
-  // cleanData = cleanData.replace(/\x1b\[[HfABCDsu]/g, ''); // cursor movement
+  cleanData = cleanData.replace(/\x1b\[[HfABCDsu]/g, ''); // cursor movement
   cleanData = cleanData.replace(/\x1b\[[0-9]*[JK]/g, ''); // clear screen/line  
   cleanData = cleanData.replace(/\x1b\[\?[0-9]+[hl]/g, ''); // mode changes
   
@@ -44,7 +50,8 @@ export function sanitizeTerminalOutput(data: string, previousOutput: string = ''
   
   return { 
     cleanData: combinedOutput.slice(previousOutput.length), 
-    newOutput: combinedOutput 
+    newOutput: combinedOutput,
+    shouldClear
   };
 }
 

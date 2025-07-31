@@ -4,9 +4,11 @@ import * as pty from 'node-pty';
 import * as fs from 'fs';
 import { sanitizeTerminalOutput, limitOutputLines } from './terminal-sanitizer.js';
 import { grayScale, blueScale } from './colors.js';
+import HeaderAnimation from './HeaderAnimation.js';
 
 const App = () => {
   const [terminalOutput, setTerminalOutput] = useState('');
+  const [, setTerminalHistory] = useState('');
   const [ptyProcess, setPtyProcess] = useState<any>(null);
   const [selectedPane, setSelectedPane] = useState<'terminal' | 'notes'>('terminal');
   const [notesText, setNotesText] = useState('Your notes here...');
@@ -46,7 +48,11 @@ const App = () => {
     }
   });
 
+
   useEffect(() => {
+    // Clear debug log at startup
+    fs.writeFileSync('./pty-debug.log', '');
+    
     // Spawn a shell process
     const shell = process.platform === 'win32' ? 'powershell.exe' : 'zsh';
     const ptyProc = pty.spawn(shell, [], {
@@ -66,6 +72,16 @@ const App = () => {
         const result = sanitizeTerminalOutput(data, prev);
         fs.appendFileSync('./pty-debug.log', `CLEAN: ${JSON.stringify(result.cleanData)}\n`);
         fs.appendFileSync('./pty-debug.log', `FULL: ${JSON.stringify(result.newOutput)}\n`);
+        fs.appendFileSync('./pty-debug.log', `CLEAR: ${result.shouldClear}\n`);
+        
+        // Always update history (never gets cleared)
+        setTerminalHistory(prevHistory => limitOutputLines(prevHistory + result.cleanData, 10000));
+        
+        // Handle clear command
+        if (result.shouldClear) {
+          return result.cleanData; // Start fresh with just the new data
+        }
+        
         return limitOutputLines(result.newOutput, 1000);
       });
     });
@@ -79,23 +95,7 @@ const App = () => {
 
   return (
     <Box width="100%" height="100%" flexDirection="column">
-      {/* Header with ASCII art */}
-      <Box 
-        width="100%" 
-        borderStyle="double"
-        borderColor="red"
-        justifyContent="center"
-        padding={1}
-        marginBottom={1}
-      >
-        <Text>
-{`  ______                       __           
- /_  __/__  _________ ___  _____/ /____  _____
-  / / / _ \\/ ___/ __ \`__ \\/ ___/ __/ _ \\/ ___/
- / / /  __/ /  / / / / / (__  ) /_/  __/ /    
-/_/  \\___/_/  /_/ /_/ /_/____/\\__/\\___/_/`}
-        </Text>
-      </Box>
+      <HeaderAnimation />
 
       <Box width="100%" flexGrow={1}>
         {/* Left pane - Terminal */}
