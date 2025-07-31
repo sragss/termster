@@ -57,6 +57,6 @@ After React DevTools starts up, you should see the component tree of your CLI. Y
 # TODO
 - [ ] Save xterm-debug.log in ~/.termster/logs -- then allow the user to view it in the TUI if they want full history
 - [ ] Do the same for the chat log
-- [ ] Fix flickering / re-renders
+- [ ] Fix flickering / re-renders -- use react-devtools
 - [ ] Allow non-mutable terminal commands
 - [ ] Clearer CTA when needing user input

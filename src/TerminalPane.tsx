@@ -107,10 +107,11 @@ const TerminalPane = ({
 					const serialized = serializer.current.serialize();
 					let sanitized = sanitizeTerminalOutput(serialized);
 					
-					// Use xterm's configured dimensions minus the Box padding
+					// Use xterm's configured dimensions minus UI overhead
 					const lines = sanitized.split('\n');
 					const xtermRows = term.current.rows;
-					const visibleRows = xtermRows - 1; // Account for Box padding={1} at top
+					const uiOffset = 4; // Adjust this number until it's perfect
+					const visibleRows = xtermRows - uiOffset;
 					
 					fs.appendFile(
 						'./xterm-debug.log',
