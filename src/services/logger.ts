@@ -18,16 +18,42 @@ export interface LogEntry {
 
 export class Logger {
 	private static logDir = join(homedir(), '.termster', 'logs');
-	private static logFile = join(Logger.logDir, 'tool-calls.log');
+	private static logFile: string;
 	private static enabled: boolean = false;
 	private static writeQueue: Promise<void> = Promise.resolve();
+	private static sessionInitialized: boolean = false;
 
 	public static setEnabled(enabled: boolean): void {
 		Logger.enabled = enabled;
+		if (enabled && !Logger.sessionInitialized) {
+			Logger.initializeSession();
+		}
 	}
 
 	public static isEnabled(): boolean {
 		return Logger.enabled;
+	}
+
+	public static getLogFile(): string | null {
+		return Logger.sessionInitialized ? Logger.logFile : null;
+	}
+
+	private static initializeSession(): void {
+		const now = new Date();
+		const timestamp = now.toISOString()
+			.replace(/:/g, '-')
+			.replace(/\./g, '_')
+			.replace('T', '_')
+			.replace('Z', '');
+		Logger.logFile = join(Logger.logDir, `session_${timestamp}.log`);
+		Logger.sessionInitialized = true;
+		
+		// Write session start marker
+		const sessionStart = Logger.formatLogEntry(LogLevel.INFO, 'SESSION_START', {
+			timestamp: now.toISOString(),
+			logFile: Logger.logFile
+		});
+		Logger.queueWrite(sessionStart);
 	}
 
 	private static async ensureLogDirectory(): Promise<void> {
