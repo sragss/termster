@@ -12,6 +12,7 @@ const App = () => {
   const [ptyProcess, setPtyProcess] = useState<any>(null);
   const [selectedPane, setSelectedPane] = useState<'terminal' | 'notes'>('terminal');
   const [notesText, setNotesText] = useState('Your notes here...');
+  const [flashError, setFlashError] = useState(false);
 
   useInput((input, key) => {
     // Global exit handlers
@@ -26,14 +27,10 @@ const App = () => {
         ptyProcess.write('\r');
       } else if (key.backspace || key.delete) {
         ptyProcess.write('\x7f');
-      } else if (key.upArrow) {
-        ptyProcess.write('\x1b[A');
-      } else if (key.downArrow) {
-        ptyProcess.write('\x1b[B');
-      } else if (key.leftArrow) {
-        ptyProcess.write('\x1b[D');
-      } else if (key.rightArrow) {
-        ptyProcess.write('\x1b[C');
+      } else if (key.upArrow || key.downArrow || key.leftArrow || key.rightArrow || key.pageUp || key.pageDown) {
+        // Flash error for unsupported keys
+        setFlashError(true);
+        setTimeout(() => setFlashError(false), 200);
       } else if (input) {
         ptyProcess.write(input);
       }
@@ -102,7 +99,7 @@ const App = () => {
         <Box 
           width="50%" 
           borderStyle="round"
-          borderColor={selectedPane === 'terminal' ? blueScale.base : grayScale.light}
+          borderColor={flashError && selectedPane === 'terminal' ? 'red' : (selectedPane === 'terminal' ? blueScale.base : grayScale.light)}
           flexDirection="column"
           padding={1}
         >
