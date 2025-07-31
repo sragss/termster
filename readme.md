@@ -1,5 +1,7 @@
 # termster
 
+![Termster Demo](imgs/termster_2.gif)
+
 A terminal emulator with AI chat capabilities built using React and Ink.
 
 ## Install
