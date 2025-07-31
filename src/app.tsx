@@ -1,19 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Text, useInput } from 'ink';
-import * as pty from 'node-pty';
-import * as fs from 'fs';
-import { sanitizeTerminalOutput, limitOutputLines } from './terminal-sanitizer.js';
+import React, { useState } from 'react';
+import { Box, Text, useInput, useStdout } from 'ink';
 import HeaderAnimation from './HeaderAnimation.js';
 import TerminalPane from './TerminalPane.js';
 import NotesPane from './NotesPane.js';
 
 const App = () => {
-  const [terminalOutput, setTerminalOutput] = useState('');
-  const [, setTerminalHistory] = useState('');
-  const [ptyProcess, setPtyProcess] = useState<any>(null);
+  const { stdout } = useStdout();
   const [selectedPane, setSelectedPane] = useState<'terminal' | 'notes'>('terminal');
   const [notesText, setNotesText] = useState('Your notes here...');
-  const [flashError, setFlashError] = useState(false);
+
+  // Compute window dimensions upfront
+  const totalCols = stdout.columns || 80;
+  const totalRows = stdout.rows - 2 || 24;
+  const statusLineHeight = 1;
+  const headerHeight = 8; // HeaderAnimation height
+  const availableHeight = totalRows - statusLineHeight - headerHeight;
+  const paneHeight = availableHeight;
 
   useInput((input, key) => {
     // Global exit handlers
@@ -21,94 +23,33 @@ const App = () => {
       process.exit(0);
     }
     
+    // Only handle global app-level actions
     if (key.shift && key.tab) {
       setSelectedPane(prev => prev === 'terminal' ? 'notes' : 'terminal');
-    } else if (selectedPane === 'terminal' && ptyProcess) {
-      if (key.return) {
-        ptyProcess.write('\r');
-      } else if (key.backspace || key.delete) {
-        ptyProcess.write('\x7f');
-      } else if (key.upArrow || key.downArrow || key.leftArrow || key.rightArrow || key.pageUp || key.pageDown) {
-        // Flash error for unsupported keys
-        setFlashError(true);
-        setTimeout(() => setFlashError(false), 200);
-      } else if (input) {
-        ptyProcess.write(input);
-      }
-    } else if (selectedPane === 'notes') {
-      if (key.return) {
-        setNotesText(prev => prev + '\n');
-      } else if (key.backspace || key.delete) {
-        setNotesText(prev => prev.slice(0, -1));
-      } else if (input) {
-        setNotesText(prev => prev + input);
-      }
     }
+    // All other input is handled by individual pane components
   });
 
-
-  useEffect(() => {
-    // Clear debug log at startup
-    fs.writeFileSync('./pty-debug.log', '');
-    
-    // Spawn a shell process
-    const shell = process.platform === 'win32' ? 'powershell.exe' : 'zsh';
-    const ptyProc = pty.spawn(shell, [], {
-      name: 'xterm-color',
-      cols: 40, // Half width for left pane
-      rows: 24,
-      cwd: process.cwd(),
-      env: process.env
-    });
-
-    // Capture output from the PTY
-    ptyProc.onData((data: string) => {
-      // Log raw output to local file for debugging
-      fs.appendFileSync('./pty-debug.log', `RAW: ${JSON.stringify(data)}\n`);
-      
-      setTerminalOutput(prev => {
-        const result = sanitizeTerminalOutput(data, prev);
-        fs.appendFileSync('./pty-debug.log', `CLEAN: ${JSON.stringify(result.cleanData)}\n`);
-        fs.appendFileSync('./pty-debug.log', `FULL: ${JSON.stringify(result.newOutput)}\n`);
-        fs.appendFileSync('./pty-debug.log', `CLEAR: ${result.shouldClear}\n`);
-        
-        // Always update history (never gets cleared)
-        setTerminalHistory(prevHistory => limitOutputLines(prevHistory + result.cleanData, 10000));
-        
-        // Handle clear command
-        if (result.shouldClear) {
-          return result.cleanData; // Start fresh with just the new data
-        }
-        
-        return limitOutputLines(result.newOutput, 1000);
-      });
-    });
-
-    setPtyProcess(ptyProc);
-
-    return () => {
-      ptyProc.kill();
-    };
-  }, []);
-
   return (
-    <Box width="100%" height="100%" flexDirection="column">
-      <HeaderAnimation />
+    <Box width="100%" height={totalRows} flexDirection="column">
+      <HeaderAnimation height={headerHeight} />
 
-      <Box width="100%" flexGrow={1}>
+      <Box width="100%" height={paneHeight}>
         <TerminalPane 
-          terminalOutput={terminalOutput}
           isSelected={selectedPane === 'terminal'}
-          flashError={flashError}
+          height={paneHeight}
+          totalCols={totalCols}
         />
         <NotesPane 
           notesText={notesText}
           isSelected={selectedPane === 'notes'}
+          height={paneHeight}
+          onTextChange={setNotesText}
         />
       </Box>
       
       {/* Status line */}
-      <Box width="100%">
+      <Box width="100%" height={statusLineHeight}>
         <Text dimColor>
           shift + tab to switch to {selectedPane === 'terminal' ? 'notes' : 'terminal'}
         </Text>

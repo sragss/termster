@@ -9,17 +9,21 @@
 	},
 	"scripts": {
 		"build": "tsc",
-		"dev": "tsc --watch",
+		"start": "npm run build && termster",
+		"devtools": "npm run build && DEV=true termster",
 		"test": "prettier --check . && xo && ava"
 	},
 	"files": [
 		"dist"
 	],
 	"dependencies": {
+		"@xterm/addon-serialize": "^0.13.0",
+		"@xterm/headless": "^5.5.0",
 		"ink": "^4.1.0",
 		"meow": "^11.0.0",
 		"node-pty": "^1.0.0",
 		"react": "^18.2.0",
+		"react-devtools-core": "^4.28.5",
 		"strip-ansi": "^7.1.0"
 	},
 	"devDependencies": {

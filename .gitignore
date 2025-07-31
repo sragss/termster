@@ -1,3 +1,6 @@
 node_modules
 dist
-pty-debug.log
+pty-debug.log 
+.DS_Store
+*.swp
+xterm-debug.log

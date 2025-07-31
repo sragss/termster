@@ -2,7 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Box, Text } from 'ink';
 import { grayScale } from './colors.js';
 
-const HeaderAnimation = () => {
+interface HeaderAnimationProps {
+  height: number;
+}
+
+const HeaderAnimation = ({ height }: HeaderAnimationProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const [dotCount, setDotCount] = useState(0);
@@ -55,11 +59,11 @@ const HeaderAnimation = () => {
   return (
     <Box 
       width="100%" 
+      height={height}
       borderStyle="double"
       borderColor="red"
       justifyContent="center"
       padding={1}
-      marginBottom={1}
     >
       {isLoading ? (
         <Box flexDirection="column" alignItems="center">

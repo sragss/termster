@@ -1,64 +1,36 @@
 /**
- * Terminal output sanitization utilities for Ink display
- * Removes problematic control characters while preserving ANSI colors
+ * Terminal output sanitizer for Ink compatibility
+ * 
+ * Handles terminal escape sequences that break Ink rendering:
+ * - Converts cursor positioning to spaces where appropriate
+ * - Strips screen control sequences entirely
+ * - Preserves ANSI colors and other supported sequences
  */
 
-export function sanitizeTerminalOutput(data: string, previousOutput: string = ''): { cleanData: string, newOutput: string, shouldClear: boolean } {
-  let cleanData = data;
-  let shouldClear = false;
+export function sanitizeTerminalOutput(output: string): string {
+  let sanitized = output;
   
-  // Check for clear screen commands
-  if (cleanData.includes('\x1b[2J') || cleanData.includes('\x1b[H\x1b[2J')) {
-    shouldClear = true;
-  }
+  // Convert cursor forward positioning to spaces (preserve layout)
+  sanitized = sanitized.replace(/\u001b\[(\d+)C/g, (_, digits) => {
+    const spaces = parseInt(digits, 10);
+    return ' '.repeat(spaces);
+  });
   
-  // Remove cursor positioning, clearing, and mode changes (but keep colors)
-  cleanData = cleanData.replace(/\x1b\[[HfABCDsu]/g, ''); // cursor movement
-  cleanData = cleanData.replace(/\x1b\[[0-9]*[JK]/g, ''); // clear screen/line  
-  cleanData = cleanData.replace(/\x1b\[\?[0-9]+[hl]/g, ''); // mode changes
+  // Strip cursor movement sequences (up, down, left)
+  sanitized = sanitized.replace(/\u001b\[(\d+)[ABD]/g, '');
   
-  // Handle complex zsh prompt sequences
-  // Replace sequences like: \x1b[1m\x1b[7m%\x1b[m\x1b[1m\x1b[m + spaces + \r \r with newline
-  cleanData = cleanData.replace(/\x1b\[1m\x1b\[7m%\x1b\[m\x1b\[1m\x1b\[m\s*\r \r/g, '\n');
+  // Strip cursor positioning sequences
+  sanitized = sanitized.replace(/\u001b\[(\d+);(\d+)H/g, ''); // Row;Col positioning
+  sanitized = sanitized.replace(/\u001b\[H/g, ''); // Home position
   
-  // Remove backspace-space-backspace sequences used for deletion
-  // cleanData = cleanData.replace(/\b \b/g, '');
+  // Strip screen control sequences
+  sanitized = sanitized.replace(/\u001b\[\?1049h/g, ''); // Alternate screen buffer
+  sanitized = sanitized.replace(/\u001b\[2J/g, ''); // Clear entire screen
+  sanitized = sanitized.replace(/\u001b\[\?25[lh]/g, ''); // Show/hide cursor
   
-  // Fix line endings: handle \r\r\n and \r\n patterns first, then standalone \r
-  cleanData = cleanData.replace(/\r\r\n/g, '\n'); // \r\r\n -> \n
-  cleanData = cleanData.replace(/\r\n/g, '\n');   // \r\n -> \n  
-  cleanData = cleanData.replace(/\r/g, '');       // standalone \r -> nothing
+  // Strip other problematic vim sequences
+  sanitized = sanitized.replace(/\u001b\[\?[0-9;]*[hlm]/g, ''); // Various mode switches
+  sanitized = sanitized.replace(/\u001b\[[0-9;]*[tT]/g, ''); // Window title operations
   
-  // Remove remaining control characters except \n, \t, and ANSI sequences (but keep \b for now)
-  cleanData = cleanData.replace(/[\x00-\x07\x0B\x0C\x0E-\x1A\x1C-\x1F\x7F]/g, '');
-  
-  // Handle backspaces across chunks - work with combined output
-  let combinedOutput = previousOutput + cleanData;
-  
-  // Process backspaces against the full context
-  while (combinedOutput.includes('\b')) {
-    // Find backspace and remove the character before it
-    const backspaceIndex = combinedOutput.indexOf('\b');
-    if (backspaceIndex > 0) {
-      // Remove the character before backspace and the backspace itself
-      combinedOutput = combinedOutput.slice(0, backspaceIndex - 1) + combinedOutput.slice(backspaceIndex + 1);
-    } else {
-      // Backspace at start - just remove it
-      combinedOutput = combinedOutput.slice(1);
-    }
-  }
-  
-  return { 
-    cleanData: combinedOutput.slice(previousOutput.length), 
-    newOutput: combinedOutput,
-    shouldClear
-  };
-}
-
-export function limitOutputLines(output: string, maxLines: number = 1000): string {
-  const lines = output.split('\n');
-  if (lines.length > maxLines) {
-    return lines.slice(-maxLines).join('\n');
-  }
-  return output;
+  return sanitized;
 }
