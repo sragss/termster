@@ -18,8 +18,8 @@ export function sanitizeTerminalOutput(data: string, previousOutput: string = ''
   cleanData = cleanData.replace(/\x1b\[\?[0-9]+[hl]/g, ''); // mode changes
   
   // Handle complex zsh prompt sequences
-  // Remove sequences like: \x1b[1m\x1b[7m%\x1b[m\x1b[1m\x1b[m + spaces + \r \r
-  cleanData = cleanData.replace(/\x1b\[1m\x1b\[7m%\x1b\[m\x1b\[1m\x1b\[m\s*\r \r/g, '');
+  // Replace sequences like: \x1b[1m\x1b[7m%\x1b[m\x1b[1m\x1b[m + spaces + \r \r with newline
+  cleanData = cleanData.replace(/\x1b\[1m\x1b\[7m%\x1b\[m\x1b\[1m\x1b\[m\s*\r \r/g, '\n');
   
   // Remove backspace-space-backspace sequences used for deletion
   // cleanData = cleanData.replace(/\b \b/g, '');

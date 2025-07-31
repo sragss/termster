@@ -3,8 +3,9 @@ import { Box, Text, useInput } from 'ink';
 import * as pty from 'node-pty';
 import * as fs from 'fs';
 import { sanitizeTerminalOutput, limitOutputLines } from './terminal-sanitizer.js';
-import { grayScale, blueScale } from './colors.js';
 import HeaderAnimation from './HeaderAnimation.js';
+import TerminalPane from './TerminalPane.js';
+import NotesPane from './NotesPane.js';
 
 const App = () => {
   const [terminalOutput, setTerminalOutput] = useState('');
@@ -95,26 +96,15 @@ const App = () => {
       <HeaderAnimation />
 
       <Box width="100%" flexGrow={1}>
-        {/* Left pane - Terminal */}
-        <Box 
-          width="50%" 
-          borderStyle="round"
-          borderColor={flashError && selectedPane === 'terminal' ? 'red' : (selectedPane === 'terminal' ? blueScale.base : grayScale.light)}
-          flexDirection="column"
-          padding={1}
-        >
-          <Text wrap="wrap">{terminalOutput}</Text>
-        </Box>
-        
-        {/* Right pane - Notes */}
-        <Box 
-          width="50%" 
-          borderStyle="round"
-          borderColor={selectedPane === 'notes' ? blueScale.base : grayScale.light}
-          padding={1}
-        >
-          <Text wrap="wrap">{notesText}</Text>
-        </Box>
+        <TerminalPane 
+          terminalOutput={terminalOutput}
+          isSelected={selectedPane === 'terminal'}
+          flashError={flashError}
+        />
+        <NotesPane 
+          notesText={notesText}
+          isSelected={selectedPane === 'notes'}
+        />
       </Box>
       
       {/* Status line */}
