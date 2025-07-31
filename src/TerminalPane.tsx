@@ -21,8 +21,7 @@ const TerminalPane = ({ isSelected, height, totalCols }: TerminalPaneProps) => {
   const cols = totalCols;
   const rows = height;
   
-  // Internal flash error state
-  const [flashError, setFlashError] = useState(false);
+  // Internal flash error state (removed since arrow keys are now supported)
   const term = useRef(new Terminal({ 
     cols: Math.floor(cols / 2) - 4, 
     rows: rows - 2, // Account for border and padding
@@ -34,9 +33,8 @@ const TerminalPane = ({ isSelected, height, totalCols }: TerminalPaneProps) => {
 
   // Memoize border color to prevent unnecessary layout changes
   const borderColor = useMemo(() => {
-    return flashError && isSelected ? 'red' : 
-           isSelected ? blueScale.base : grayScale.light;
-  }, [flashError, isSelected]);
+    return isSelected ? blueScale.base : grayScale.light;
+  }, [isSelected]);
 
   // Initial mount
   useEffect(() => {
@@ -96,14 +94,12 @@ const TerminalPane = ({ isSelected, height, totalCols }: TerminalPaneProps) => {
 
     fs.appendFile('./xterm-debug.log', `INPUT: ${JSON.stringify({input, key})}\n`).catch(console.error);
 
-    // Handle flash error for unsupported arrow keys
-    if (key.leftArrow || key.rightArrow) {
-      setFlashError(true);
-      setTimeout(() => setFlashError(false), 200);
-      return; // Don't send arrow keys to terminal
-    }
-
-    if (key.return) ptyRef.current.write('\r');
+    // Handle arrow keys with proper escape sequences
+    if (key.upArrow) ptyRef.current.write('\u001b[A');
+    else if (key.downArrow) ptyRef.current.write('\u001b[B');
+    else if (key.rightArrow) ptyRef.current.write('\u001b[C');
+    else if (key.leftArrow) ptyRef.current.write('\u001b[D');
+    else if (key.return) ptyRef.current.write('\r');
     else if (key.tab) ptyRef.current.write('\t');
     else if (key.backspace || key.delete) ptyRef.current.write('\x7f');
     else if (input) ptyRef.current.write(input);
