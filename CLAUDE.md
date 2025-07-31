@@ -19,17 +19,20 @@ Termster is a terminal emulator with split-pane functionality built using React 
 ### Core Components
 
 - **App (`src/app.tsx`)**: Main application component that manages global state and input handling
+
   - Manages PTY process for terminal interaction
   - Handles pane switching (Shift+Tab)
   - Controls input routing between terminal and notes panes
   - Implements terminal output sanitization and history management
 
 - **TerminalPane (`src/TerminalPane.tsx`)**: Left pane displaying terminal output
+
   - Shows sanitized terminal output with ANSI color support
   - Visual feedback for unsupported key presses (arrow keys flash red)
   - Border color indicates active pane
 
 - **NotesPane (`src/NotesPane.tsx`)**: Right pane for user notes
+
   - Simple text editor functionality
   - Supports basic text input, backspace, and enter
 
@@ -49,7 +52,7 @@ Termster is a terminal emulator with split-pane functionality built using React 
 ### Input Handling
 
 - **Global**: Ctrl+C or Ctrl+D exits application
-- **Shift+Tab**: Switches between terminal and notes panes  
+- **Shift+Tab**: Switches between terminal and notes panes
 - **Terminal pane**: Input passed directly to PTY process
 - **Notes pane**: Basic text editing (input, backspace, enter)
 - **Unsupported**: Arrow keys are blocked in terminal (flashes error)

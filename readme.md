@@ -34,10 +34,13 @@ $ termster --help
 Ink supports React DevTools out-of-the-box. To enable integration with React DevTools in your CLI:
 
 1. Run your app with the `DEV=true` environment variable:
+
    ```bash
    npm run devtools
    ```
+
    or
+
    ```bash
    DEV=true termster
    ```
