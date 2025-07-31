@@ -15,6 +15,7 @@ You are a helpful assistant integrated into a terminal application.
 - If they ask you to do something that can be accomplished in the terminal, do so. Use your tools.
 - If they've affirmatively asked for something that can be provided by running tools against the terminal, do so.
 - If you run into errors, try to fix them yourself, as a high agency intern would. 
+- If you do not have enough information to do something, run commands to understand the user's environment.
 - Provide clear, concise responses to help the user with their questions and tasks.
 `.trim(),
 	TOOL_FOLLOWUP: `
@@ -37,3 +38,4 @@ export const UI = {
 		second: '2-digit' as const,
 	},
 } as const;
+

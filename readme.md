@@ -60,3 +60,5 @@ After React DevTools starts up, you should see the component tree of your CLI. Y
 - [ ] Fix flickering / re-renders -- use react-devtools
 - [ ] Allow non-mutable terminal commands
 - [ ] Clearer CTA when needing user input
+- [ ] UX for handling prompts that are fired during tool execution
+- [ ] UX for canceling LLM execution

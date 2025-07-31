@@ -49,16 +49,16 @@ const PromptPane = ({
 
 		const [, toolName, params, result] = match;
 
+		// Render as single inline text to prevent wrapping
 		return (
-			<>
+			<Text>
 				<Text color={grayScale.light}>↳ </Text>
 				<Text color={redScale.dark}>{toolName}</Text>
 				<Text color={grayScale.light}>(</Text>
 				<Text color={whiteScale.light}>{params}</Text>
-				<Text color={grayScale.light}>) </Text>
-				<Text color={grayScale.light}>→ </Text>
+				<Text color={grayScale.light}>) → </Text>
 				<Text color={redScale.base}>{result}</Text>
-			</>
+			</Text>
 		);
 	}, []);
 
@@ -160,16 +160,17 @@ const PromptPane = ({
 
 			{/* Current input line */}
 			<Box>
-				<Text dimColor>[{formatTimestamp()}] </Text>
 				{pendingApproval ? (
-					<Text color={redScale.base}>
-						Waiting for approval... [Enter=Yes, Esc=No]
-						{isSelected && <Text inverse> </Text>}
+					<Text wrap="wrap" color={blueScale.base}>
+						<Text dimColor>[{formatTimestamp()}] </Text>
+						Waiting for approval... [Enter=Yes, Esc=No]{isSelected && <Text inverse> </Text>}
 					</Text>
 				) : (
-					<Text color={currentInput.startsWith('/') ? 'green' : 'white'}>
-						{currentInput}
-						{isSelected && <Text inverse> </Text>}
+					<Text wrap="wrap">
+						<Text dimColor>[{formatTimestamp()}] </Text>
+						<Text color={currentInput.startsWith('/') ? 'green' : 'white'}>
+							{currentInput}{isSelected && <Text inverse> </Text>}
+						</Text>
 					</Text>
 				)}
 			</Box>

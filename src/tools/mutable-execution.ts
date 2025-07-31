@@ -2,6 +2,9 @@ import {TermsterTool} from './types.js';
 import {ToolExecutor, ToolExecutionResult} from './terminal-history.js';
 import {Logger} from '../services/logger.js';
 
+// Maximum characters to include in LLM context (most recent output)
+const MAX_COMMAND_OUTPUT_LENGTH = 500;
+
 // Interface for terminal command execution
 export interface TerminalExecutor {
 	executeCommand(command: string): Promise<string>;
@@ -101,10 +104,14 @@ export class MutableExecutionToolExecutor implements ToolExecutor {
 			// Execute the command in the terminal context
 			const result = await this.terminalExecutor.executeCommand(command);
 
+			// Truncate to most recent characters for LLM context
+			const truncatedResult = result.length > MAX_COMMAND_OUTPUT_LENGTH 
+				? '...' + result.slice(-MAX_COMMAND_OUTPUT_LENGTH)
+				: result;
 
 			return {
 				success: true,
-				output: result,
+				output: truncatedResult,
 			};
 		} catch (error) {
 			const errorMessage = `Failed to execute command: ${
