@@ -18,8 +18,35 @@ $ termster --help
 
   Options
     --name  Your name
+    --devtools  Enable React DevTools
 
   Examples
     $ termster --name=Jane
     Hello, Jane
+    $ termster --devtools
+    Launch with React DevTools enabled
 ```
+
+## Development
+
+### React DevTools
+
+Ink supports React DevTools out-of-the-box. To enable integration with React DevTools in your CLI:
+
+1. Run your app with the `DEV=true` environment variable:
+   ```bash
+   npm run devtools
+   ```
+   or
+   ```bash
+   DEV=true termster
+   ```
+
+2. In another terminal, start React DevTools:
+   ```bash
+   npx react-devtools
+   ```
+
+After React DevTools starts up, you should see the component tree of your CLI. You can inspect and change the props of components, and see the results immediately in the CLI, without restarting it.
+
+**Note**: You must manually quit your CLI via Ctrl+C after you're done testing.

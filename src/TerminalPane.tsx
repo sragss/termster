@@ -1,45 +1,51 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Text, useInput, useStdout, Box } from 'ink';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
+import { Text, useInput, Box } from 'ink';
 import pty from 'node-pty';
 import xtermHeadless from '@xterm/headless';
 import addonSerialize from '@xterm/addon-serialize';
 import { grayScale, blueScale } from './colors.js';
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 
 const { Terminal } = xtermHeadless;
 const { SerializeAddon } = addonSerialize;
 
 interface TerminalPaneProps {
   isSelected: boolean;
-  flashError: boolean;
+  height: number;
+  totalCols: number;
 }
 
-const TerminalPane = ({ isSelected, flashError }: TerminalPaneProps) => {
-  const { stdout } = useStdout();
-  const cols = stdout.columns || 80;
-  const rows = stdout.rows || 24;
+const TerminalPane = ({ isSelected, height, totalCols }: TerminalPaneProps) => {
+  // Use passed-in dimensions instead of computing them
+  const cols = totalCols;
+  const rows = height;
+  
+  // Internal flash error state
+  const [flashError, setFlashError] = useState(false);
   const term = useRef(new Terminal({ 
     cols: Math.floor(cols / 2) - 4, 
-    rows: rows - 6,
+    rows: rows - 2, // Account for border and padding
     allowProposedApi: true 
   }));
   const serializer = useRef(new SerializeAddon());
   const [frame, setFrame] = useState('');
   const ptyRef = useRef<pty.IPty | null>(null);
 
-  // Simple border color calculation
-  const borderColor = flashError && isSelected ? 'red' : 
-                     isSelected ? blueScale.base : grayScale.light;
+  // Memoize border color to prevent unnecessary layout changes
+  const borderColor = useMemo(() => {
+    return flashError && isSelected ? 'red' : 
+           isSelected ? blueScale.base : grayScale.light;
+  }, [flashError, isSelected]);
 
   // Initial mount
   useEffect(() => {
     // Clear debug logs
-    fs.writeFileSync('./xterm-debug.log', 'XTERM DEBUG LOG\n=================\n');
+    fs.writeFile('./xterm-debug.log', 'XTERM DEBUG LOG\n=================\n').catch(console.error);
     
     const termCols = Math.floor(cols / 2) - 4;
-    const termRows = rows - 6;
+    const termRows = rows - 2; // Account for border and padding
     
-    fs.appendFileSync('./xterm-debug.log', `Initial setup: cols=${termCols}, rows=${termRows}\n`);
+    fs.appendFile('./xterm-debug.log', `Initial setup: cols=${termCols}, rows=${termRows}\n`).catch(console.error);
     
     term.current.loadAddon(serializer.current);
     ptyRef.current = pty.spawn('zsh', [], {
@@ -48,23 +54,26 @@ const TerminalPane = ({ isSelected, flashError }: TerminalPaneProps) => {
       rows: termRows,
     });
 
-    fs.appendFileSync('./xterm-debug.log', `PTY spawned successfully\n`);
+    fs.appendFile('./xterm-debug.log', `PTY spawned successfully\n`).catch(console.error);
 
     // Pipe PTY → xterm
     ptyRef.current.onData(data => {
-      fs.appendFileSync('./xterm-debug.log', `PTY DATA: ${JSON.stringify(data)}\n`);
+      fs.appendFile('./xterm-debug.log', `PTY DATA: ${JSON.stringify(data)}\n`).catch(console.error);
       
       term.current.write(data);
       
-      try {
-        const serialized = serializer.current.serialize();
-        fs.appendFileSync('./xterm-debug.log', `SERIALIZED LENGTH: ${serialized.length}\n`);
-        fs.appendFileSync('./xterm-debug.log', `SERIALIZED CONTENT: ${JSON.stringify(serialized)}\n`);
-        setFrame(serialized);
-      } catch (error) {
-        fs.appendFileSync('./xterm-debug.log', `SERIALIZE ERROR: ${error}\n`);
-        setFrame('SERIALIZE ERROR');
-      }
+      // Use setTimeout to ensure xterm has processed the data before serializing
+      setTimeout(() => {
+        try {
+          const serialized = serializer.current.serialize();
+          fs.appendFile('./xterm-debug.log', `SERIALIZED LENGTH: ${serialized.length}\n`).catch(console.error);
+          fs.appendFile('./xterm-debug.log', `SERIALIZED CONTENT: ${JSON.stringify(serialized)}\n`).catch(console.error);
+          setFrame(serialized);
+        } catch (error) {
+          fs.appendFile('./xterm-debug.log', `SERIALIZE ERROR: ${error}\n`).catch(console.error);
+          setFrame('SERIALIZE ERROR');
+        }
+      }, 0);
     });
 
     // Cleanup
@@ -74,7 +83,7 @@ const TerminalPane = ({ isSelected, flashError }: TerminalPaneProps) => {
   // Window resize
   useEffect(() => {
     const termCols = Math.floor(cols / 2) - 4;
-    const termRows = rows - 6;
+    const termRows = rows - 2; // Account for border and padding
     term.current.resize(termCols, termRows);
     ptyRef.current?.resize(termCols, termRows);
   }, [cols, rows]);
@@ -83,34 +92,47 @@ const TerminalPane = ({ isSelected, flashError }: TerminalPaneProps) => {
   useInput((input, key) => {
     if (!isSelected || !ptyRef.current) return;
 
-    fs.appendFileSync('./xterm-debug.log', `INPUT: ${JSON.stringify({input, key})}\n`);
+    fs.appendFile('./xterm-debug.log', `INPUT: ${JSON.stringify({input, key})}\n`).catch(console.error);
+
+    // Handle flash error for unsupported arrow keys
+    if (key.leftArrow || key.rightArrow) {
+      setFlashError(true);
+      setTimeout(() => setFlashError(false), 200);
+      return; // Don't send arrow keys to terminal
+    }
 
     if (key.return) ptyRef.current.write('\r');
     else if (key.tab) ptyRef.current.write('\t');
     else if (key.backspace || key.delete) ptyRef.current.write('\x7f');
     else if (input) ptyRef.current.write(input);
-  }, { isActive: isSelected });
+  });
 
   // Log current frame for debugging
   useEffect(() => {
-    fs.appendFileSync('./xterm-debug.log', `RENDER FRAME LENGTH: ${frame.length}\n`);
+    fs.appendFile('./xterm-debug.log', `RENDER FRAME LENGTH: ${frame.length}\n`).catch(console.error);
     if (frame.length < 200) {
-      fs.appendFileSync('./xterm-debug.log', `RENDER FRAME: ${JSON.stringify(frame)}\n`);
+      fs.appendFile('./xterm-debug.log', `RENDER FRAME: ${JSON.stringify(frame)}\n`).catch(console.error);
     }
+  }, [frame]);
+
+  // Memoize the terminal content to prevent unnecessary re-renders
+  const memoizedContent = useMemo(() => {
+    return <Text>{frame}</Text>;
   }, [frame]);
 
   return (
     <Box 
       width="50%" 
+      height={height}
       borderStyle="round"
       borderColor={borderColor}
       flexDirection="column"
       padding={1}
       overflow="hidden"
     >
-      <Text>{frame}</Text>
+      {memoizedContent}
     </Box>
   );
 };
 
-export default TerminalPane;
+export default React.memo(TerminalPane);
