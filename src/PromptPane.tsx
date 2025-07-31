@@ -5,12 +5,14 @@ import ThinkingAnimation from './components/ThinkingAnimation.js';
 import {TerminalHistoryService} from './services/terminal-history.js';
 import {useLLMChat} from './hooks/useLLMChat.js';
 import {PATTERNS, UI} from './constants.js';
+import {TerminalExecutor} from './tools/mutable-execution.js';
 
 interface PromptPaneProps {
 	isSelected: boolean;
 	height: number;
 	onCommand?: (command: string) => void;
 	historyService?: TerminalHistoryService;
+	terminalExecutor?: TerminalExecutor;
 }
 
 const PromptPane = ({
@@ -18,9 +20,13 @@ const PromptPane = ({
 	height,
 	onCommand,
 	historyService,
+	terminalExecutor,
 }: PromptPaneProps) => {
 	const [currentInput, setCurrentInput] = useState('');
-	const {history, sendMessage, addCommand} = useLLMChat({historyService});
+	const {history, pendingApproval, sendMessage, addCommand, approveToolCall, rejectToolCall} = useLLMChat({
+		historyService,
+		terminalExecutor,
+	});
 
 	// Component to render tool calls with brand colors
 	const renderToolCallWithColors = useCallback((toolCallText: string) => {
@@ -53,13 +59,26 @@ const PromptPane = ({
 	useInput((input, key) => {
 		if (!isSelected) return;
 
+		// Handle approval flow
+		if (pendingApproval) {
+			if (key.return) {
+				approveToolCall();
+				return;
+			} else if (key.escape) {
+				rejectToolCall();
+				return;
+			}
+			// Block all other input during approval
+			return;
+		}
+
 		if (key.return) {
 			if (currentInput.trim()) {
 				if (currentInput.startsWith('/')) {
 					// It's a command
 					const command = currentInput.slice(1); // Remove the "/"
 					addCommand(currentInput);
-					
+
 					if (onCommand) {
 						onCommand(command);
 					}
@@ -76,7 +95,6 @@ const PromptPane = ({
 			setCurrentInput(prev => prev + input);
 		}
 	});
-
 
 	return (
 		<Box
@@ -96,6 +114,18 @@ const PromptPane = ({
 							<ThinkingAnimation />
 						) : entry.type === 'tool_call' ? (
 							renderToolCallWithColors(entry.command)
+						) : entry.type === 'approval_pending' ? (
+							<Text color={redScale.base} wrap="wrap">
+								{entry.command}
+							</Text>
+						) : entry.type === 'approval_granted' ? (
+							<Text color="green" wrap="wrap">
+								✓ {entry.command}
+							</Text>
+						) : entry.type === 'approval_denied' ? (
+							<Text color="red" wrap="wrap">
+								✗ {entry.command}
+							</Text>
 						) : (
 							<Text
 								color={
@@ -117,10 +147,17 @@ const PromptPane = ({
 			{/* Current input line */}
 			<Box>
 				<Text dimColor>[{formatTimestamp()}] </Text>
-				<Text color={currentInput.startsWith('/') ? 'green' : 'white'}>
-					{currentInput}
-					{isSelected && <Text inverse> </Text>}
-				</Text>
+				{pendingApproval ? (
+					<Text color={redScale.base}>
+						Waiting for approval... [Enter=Yes, Esc=No]
+						{isSelected && <Text inverse> </Text>}
+					</Text>
+				) : (
+					<Text color={currentInput.startsWith('/') ? 'green' : 'white'}>
+						{currentInput}
+						{isSelected && <Text inverse> </Text>}
+					</Text>
+				)}
 			</Box>
 		</Box>
 	);

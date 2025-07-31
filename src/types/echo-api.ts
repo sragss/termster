@@ -6,9 +6,7 @@ export interface EchoAPIResponse {
 	output: EchoAPIOutputItem[];
 }
 
-export type EchoAPIOutputItem = 
-	| EchoAPIMessageItem 
-	| EchoAPIFunctionCallItem;
+export type EchoAPIOutputItem = EchoAPIMessageItem | EchoAPIFunctionCallItem;
 
 export interface EchoAPIMessageItem {
 	type: 'message';
@@ -35,14 +33,20 @@ export interface EchoAPIFunctionResult {
 }
 
 // Type guards for runtime type checking
-export const isMessageItem = (item: EchoAPIOutputItem): item is EchoAPIMessageItem => {
+export const isMessageItem = (
+	item: EchoAPIOutputItem,
+): item is EchoAPIMessageItem => {
 	return item.type === 'message';
 };
 
-export const isFunctionCallItem = (item: EchoAPIOutputItem): item is EchoAPIFunctionCallItem => {
+export const isFunctionCallItem = (
+	item: EchoAPIOutputItem,
+): item is EchoAPIFunctionCallItem => {
 	return item.type === 'function_call';
 };
 
-export const isOutputTextContent = (content: EchoAPIContentItem): content is EchoAPIContentItem => {
+export const isOutputTextContent = (
+	content: EchoAPIContentItem,
+): content is EchoAPIContentItem => {
 	return content.type === 'output_text';
 };

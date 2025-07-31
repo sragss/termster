@@ -9,7 +9,8 @@ export const API_CONFIG = {
 
 // LLM Instructions
 export const LLM_INSTRUCTIONS = {
-	INITIAL: 'You are a helpful assistant integrated into a terminal application. Provide clear, concise responses to help the user with their questions and tasks.',
+	INITIAL:
+		'You are a helpful assistant integrated into a terminal application. Provide clear, concise responses to help the user with their questions and tasks.',
 	TOOL_FOLLOWUP: 'Continue the conversation with the tool results.',
 } as const;
 

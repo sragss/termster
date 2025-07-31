@@ -7,6 +7,7 @@ import {ChatService, StreamingChatCallback, ToolCall} from '../types/llm.js';
 import {ConfigService} from './config.js';
 import {getOpenAITools, ToolRegistry} from '../tools/index.js';
 import {TerminalHistoryService} from './terminal-history.js';
+import {TerminalExecutor} from '../tools/mutable-execution.js';
 import {
 	EchoAPIResponse,
 	EchoAPIFunctionResult,
@@ -24,10 +25,13 @@ export class ChatLoop implements ChatService {
 	private configService: ConfigService;
 	public toolExecutor?: ToolRegistry;
 
-	constructor(historyService?: TerminalHistoryService) {
+	constructor(
+		historyService?: TerminalHistoryService,
+		terminalExecutor?: TerminalExecutor,
+	) {
 		this.configService = new ConfigService();
 		if (historyService) {
-			this.toolExecutor = new ToolRegistry(historyService);
+			this.toolExecutor = new ToolRegistry(historyService, terminalExecutor);
 		}
 	}
 
@@ -68,10 +72,7 @@ export class ChatLoop implements ChatService {
 				  ].filter(Boolean) as ResponseInputItem[])
 				: (this.conversationHistory.filter(Boolean) as ResponseInputItem[]);
 
-			let response = await this.makeApiCall(
-				input,
-				LLM_INSTRUCTIONS.INITIAL,
-			);
+			let response = await this.makeApiCall(input, LLM_INSTRUCTIONS.INITIAL);
 
 			// Handle tool calls in simple loop (no recursion)
 			while (callbacks?.onToolCall && this.toolExecutor) {
@@ -121,10 +122,10 @@ export class ChatLoop implements ChatService {
 			previous_response_id: this.lastResponseId,
 		} satisfies ResponseCreateParams);
 
-		const response = await Promise.race([
+		const response = (await Promise.race([
 			apiPromise,
 			timeoutPromise,
-		]) as EchoAPIResponse;
+		])) as EchoAPIResponse;
 		this.lastResponseId = response.id;
 		return response;
 	}

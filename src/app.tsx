@@ -7,6 +7,7 @@ import PromptPane from './PromptPane.js';
 import ApiKeyPrompt from './components/ApiKeyPrompt.js';
 import {ConfigService} from './services/config.js';
 import {TerminalHistoryService} from './services/terminal-history.js';
+import {PTYTerminalExecutor} from './services/terminal-executor.js';
 
 const App = () => {
 	const {stdout} = useStdout();
@@ -19,6 +20,7 @@ const App = () => {
 	const historyService = useRef<TerminalHistoryService>(
 		new TerminalHistoryService(),
 	);
+	const [terminalExecutor, setTerminalExecutor] = useState<PTYTerminalExecutor | null>(null);
 
 	// Check for API key on mount
 	useEffect(() => {
@@ -48,7 +50,6 @@ const App = () => {
 			// Send a newline first to ensure we're on a fresh line
 			ptyRef.current.write('\r');
 			// Send the command
-			console.log('Sending command to terminal:', JSON.stringify(command));
 			ptyRef.current.write(command + '\r');
 		}
 	};
@@ -102,6 +103,7 @@ const App = () => {
 						totalCols={totalCols}
 						onPtyReady={pty => {
 							ptyRef.current = pty;
+							setTerminalExecutor(new PTYTerminalExecutor(pty));
 						}}
 						historyService={historyService.current}
 					/>
@@ -110,6 +112,7 @@ const App = () => {
 						height={paneHeight}
 						onCommand={handleCommand}
 						historyService={historyService.current}
+						terminalExecutor={terminalExecutor || undefined}
 					/>
 				</Box>
 			)}

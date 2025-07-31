@@ -10,6 +10,7 @@ const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json');
 
 interface Config {
 	ECHO_API_KEY?: string;
+	enableLogging?: boolean;
 }
 
 export class ConfigService {
@@ -34,6 +35,16 @@ export class ConfigService {
 	// Save API key directly (for React component)
 	async saveApiKey(apiKey: string): Promise<void> {
 		this.config.ECHO_API_KEY = apiKey;
+		this.saveConfig();
+	}
+
+	// Logging configuration methods
+	isLoggingEnabled(): boolean {
+		return this.config.enableLogging ?? false;
+	}
+
+	setLoggingEnabled(enabled: boolean): void {
+		this.config.enableLogging = enabled;
 		this.saveConfig();
 	}
 

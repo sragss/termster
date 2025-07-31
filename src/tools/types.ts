@@ -11,6 +11,7 @@ export interface TermsterTool {
 	definition: OpenAI_FunctionTool;
 	requires_approval: boolean;
 	render: ToolRenderFunction;
+	render_approval?: ToolRenderFunction;
 }
 
 // Re-export OpenAI types for convenience

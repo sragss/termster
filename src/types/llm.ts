@@ -28,6 +28,10 @@ export interface ToolCall {
 export interface StreamingChatCallback {
 	onChunk?: (text: string) => void;
 	onToolCall?: (toolCall: ToolCall) => Promise<string>;
+	onToolApprovalRequest?: (
+		toolCall: ToolCall,
+		renderedCall: string,
+	) => Promise<boolean>;
 	onComplete?: (message: string) => void;
 	onError?: (error: Error) => void;
 }
