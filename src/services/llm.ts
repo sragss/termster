@@ -6,8 +6,7 @@ import type {
 } from "openai/resources/responses/responses";
 import { ChatService, StreamingChatCallback, ToolCall } from '../types/llm.js';
 import { ConfigService } from './config.js';
-import { ALL_TOOLS } from '../types/tools.js';
-import { TerminalToolExecutor } from './tools.js';
+import { getOpenAITools, ToolRegistry } from '../tools/index.js';
 import { TerminalHistoryService } from './terminal-history.js';
 
 export interface ModelConfig {
@@ -26,12 +25,12 @@ export class ChatLoop implements ChatService {
   private conversationHistory: ResponseInputItem[] = [];
   private lastResponseId?: string;
   private configService: ConfigService;
-  public toolExecutor?: TerminalToolExecutor;
+  public toolExecutor?: ToolRegistry;
 
   constructor(historyService?: TerminalHistoryService) {
     this.configService = new ConfigService();
     if (historyService) {
-      this.toolExecutor = new TerminalToolExecutor(historyService);
+      this.toolExecutor = new ToolRegistry(historyService);
     }
   }
 
@@ -86,7 +85,7 @@ export class ChatLoop implements ChatService {
         input: input as any, // Type assertion for compatibility
         stream: false,
         parallel_tool_calls: false,
-        tools: this.toolExecutor ? ALL_TOOLS : undefined,
+        tools: this.toolExecutor ? getOpenAITools() : undefined,
         tool_choice: this.toolExecutor ? "auto" : undefined,
         store: true,
         previous_response_id: this.lastResponseId,
@@ -132,7 +131,7 @@ export class ChatLoop implements ChatService {
           input: functionOutputs as any, // Only send the function outputs
           stream: false,
           parallel_tool_calls: false,
-          tools: ALL_TOOLS,
+          tools: getOpenAITools(),
           tool_choice: "auto",
           store: true,
           previous_response_id: this.lastResponseId,
