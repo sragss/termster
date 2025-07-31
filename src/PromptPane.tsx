@@ -1,11 +1,13 @@
-import React, {useState} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {Box, Text, useInput} from 'ink';
 import {grayScale, blueScale} from './colors.js';
+import {ChatLoop} from './services/llm.js';
+import {StreamingChatCallback} from './types/llm.js';
 
 interface CommandEntry {
 	command: string;
 	timestamp: string;
-	type: 'command' | 'text';
+	type: 'command' | 'text' | 'assistant' | 'thinking';
 }
 
 interface PromptPaneProps {
@@ -21,6 +23,12 @@ const PromptPane = ({
 }: PromptPaneProps) => {
 	const [commandHistory, setCommandHistory] = useState<CommandEntry[]>([]);
 	const [currentInput, setCurrentInput] = useState('');
+	const [isLoading, setIsLoading] = useState(false);
+	const chatService = useRef<ChatLoop | null>(null);
+
+	useEffect(() => {
+		chatService.current = new ChatLoop();
+	}, []);
 
 	const formatTimestamp = () => {
 		const now = new Date();
@@ -51,11 +59,15 @@ const PromptPane = ({
 						onCommand(command);
 					}
 				} else {
-					// It's regular text
+					// It's regular text - send to LLM
 					setCommandHistory(prev => [
 						...prev,
 						{command: currentInput, timestamp, type: 'text'},
+						{command: 'thinking...', timestamp, type: 'thinking'},
 					]);
+					
+					// Send to LLM
+					handleLLMRequest(currentInput);
 				}
 				
 				setCurrentInput('');
@@ -66,6 +78,45 @@ const PromptPane = ({
 			setCurrentInput(prev => prev + input);
 		}
 	});
+
+	const handleLLMRequest = async (userInput: string) => {
+		if (!chatService.current || isLoading) return;
+		
+		setIsLoading(true);
+		
+		const callbacks: StreamingChatCallback = {
+			onComplete: (message: string) => {
+				const timestamp = formatTimestamp();
+				setCommandHistory(prev => {
+					// Remove the 'thinking...' entry and add the assistant response
+					const withoutThinking = prev.filter(entry => entry.type !== 'thinking');
+					return [
+						...withoutThinking,
+						{command: message, timestamp, type: 'assistant'},
+					];
+				});
+				setIsLoading(false);
+			},
+			onError: (error: Error) => {
+				const timestamp = formatTimestamp();
+				setCommandHistory(prev => {
+					// Remove the 'thinking...' entry and add error message
+					const withoutThinking = prev.filter(entry => entry.type !== 'thinking');
+					return [
+						...withoutThinking,
+						{command: `Error: ${error.message}`, timestamp, type: 'assistant'},
+					];
+				});
+				setIsLoading(false);
+			}
+		};
+		
+		try {
+			await chatService.current.chat(userInput, callbacks);
+		} catch (error) {
+			callbacks.onError?.(error as Error);
+		}
+	};
 
 	return (
 		<Box
@@ -82,7 +133,12 @@ const PromptPane = ({
 					<Box key={index} marginBottom={0}>
 						<Text dimColor>[{entry.timestamp}] </Text>
 						<Text
-							color={entry.type === 'command' ? 'green' : 'white'}
+							color={
+								entry.type === 'command' ? 'green' :
+								entry.type === 'assistant' ? 'blue' :
+								entry.type === 'thinking' ? 'yellow' :
+								'white'
+							}
 							wrap="wrap"
 						>
 							{entry.command}

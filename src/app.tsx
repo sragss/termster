@@ -1,16 +1,35 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {Box, Text, useInput, useStdout} from 'ink';
 import pty from 'node-pty';
 import HeaderAnimation from './HeaderAnimation.js';
 import TerminalPane from './TerminalPane.js';
 import PromptPane from './PromptPane.js';
+import ApiKeyPrompt from './components/ApiKeyPrompt.js';
+import {ConfigService} from './services/config.js';
 
 const App = () => {
 	const {stdout} = useStdout();
 	const [selectedPane, setSelectedPane] = useState<'terminal' | 'prompt'>(
-		'terminal',
+		'prompt',
 	);
+	const [hasApiKey, setHasApiKey] = useState<boolean | null>(null); // null = loading
 	const ptyRef = useRef<pty.IPty | null>(null);
+	const configService = useRef<ConfigService>(new ConfigService());
+
+	// Check for API key on mount
+	useEffect(() => {
+		const checkApiKey = async () => {
+			try {
+				// Check if API key exists without triggering auth flow
+				const hasKey = await configService.current.hasApiKey();
+				setHasApiKey(hasKey);
+			} catch (error) {
+				console.error('Error checking API key:', error);
+				setHasApiKey(false);
+			}
+		};
+		checkApiKey();
+	}, []);
 
 	// Compute window dimensions upfront
 	const totalCols = stdout.columns || 80;
@@ -27,6 +46,16 @@ const App = () => {
 			// Send the command
 			console.log('Sending command to terminal:', JSON.stringify(command));
 			ptyRef.current.write(command + '\r');
+		}
+	};
+
+	const handleApiKeySubmitted = async (apiKey: string) => {
+		try {
+			await configService.current.saveApiKey(apiKey);
+			setHasApiKey(true);
+		} catch (error) {
+			console.error('Error saving API key:', error);
+			// Could show error state here
 		}
 	};
 
@@ -47,27 +76,43 @@ const App = () => {
 		<Box width="100%" height={totalRows} flexDirection="column">
 			<HeaderAnimation height={headerHeight} />
 
-			<Box width="100%" height={paneHeight}>
-				<TerminalPane
-					isSelected={selectedPane === 'terminal'}
-					height={paneHeight}
-					totalCols={totalCols}
-					onPtyReady={pty => {
-						ptyRef.current = pty;
-					}}
-				/>
-				<PromptPane
-					isSelected={selectedPane === 'prompt'}
-					height={paneHeight}
-					onCommand={handleCommand}
-				/>
-			</Box>
+			{/* Show API key prompt if needed, otherwise show main app */}
+			{hasApiKey === null ? (
+				<Box width="100%" height={paneHeight} justifyContent="center" alignItems="center">
+					<Text>Loading...</Text>
+				</Box>
+			) : hasApiKey === false ? (
+				<Box width="100%" height={paneHeight}>
+					<ApiKeyPrompt onApiKeySubmitted={handleApiKeySubmitted} />
+				</Box>
+			) : (
+				<Box width="100%" height={paneHeight}>
+					<TerminalPane
+						isSelected={selectedPane === 'terminal'}
+						height={paneHeight}
+						totalCols={totalCols}
+						onPtyReady={pty => {
+							ptyRef.current = pty;
+						}}
+					/>
+					<PromptPane
+						isSelected={selectedPane === 'prompt'}
+						height={paneHeight}
+						onCommand={handleCommand}
+					/>
+				</Box>
+			)}
 
 			{/* Status line */}
 			<Box width="100%" height={statusLineHeight}>
 				<Text dimColor>
-					shift + tab to switch to{' '}
-					{selectedPane === 'terminal' ? 'prompt' : 'terminal'}
+					{hasApiKey ? (
+						`shift + tab to switch to ${
+							selectedPane === 'terminal' ? 'prompt' : 'terminal'
+						}`
+					) : (
+						'Enter your Echo API key to continue'
+					)}
 				</Text>
 			</Box>
 		</Box>
