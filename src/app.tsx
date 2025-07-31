@@ -6,6 +6,7 @@ import TerminalPane from './TerminalPane.js';
 import PromptPane from './PromptPane.js';
 import ApiKeyPrompt from './components/ApiKeyPrompt.js';
 import {ConfigService} from './services/config.js';
+import {TerminalHistoryService} from './services/terminal-history.js';
 
 const App = () => {
 	const {stdout} = useStdout();
@@ -15,6 +16,7 @@ const App = () => {
 	const [hasApiKey, setHasApiKey] = useState<boolean | null>(null); // null = loading
 	const ptyRef = useRef<pty.IPty | null>(null);
 	const configService = useRef<ConfigService>(new ConfigService());
+	const historyService = useRef<TerminalHistoryService>(new TerminalHistoryService());
 
 	// Check for API key on mount
 	useEffect(() => {
@@ -94,11 +96,13 @@ const App = () => {
 						onPtyReady={pty => {
 							ptyRef.current = pty;
 						}}
+						historyService={historyService.current}
 					/>
 					<PromptPane
 						isSelected={selectedPane === 'prompt'}
 						height={paneHeight}
 						onCommand={handleCommand}
+						historyService={historyService.current}
 					/>
 				</Box>
 			)}
