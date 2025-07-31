@@ -26,4 +26,9 @@ meow(
 	},
 );
 
+// Clear terminal screen before launching
+if (process.stdout.isTTY) {
+	process.stdout.write('\u001b[2J\u001b[0;0H');
+}
+
 render(<App />);
