@@ -1,6 +1,6 @@
 import React, {useMemo} from 'react';
 import {Box, Text} from 'ink';
-import {blueScale} from '../colors.js';
+import {blueScale, grayScale} from '../colors.js';
 import {usePromptContext} from '../contexts/PromptContext.js';
 import {UI} from '../constants.js';
 
@@ -18,16 +18,15 @@ const InputBox = ({isSelected, height}: InputBoxProps) => {
 		return now.toLocaleTimeString('en-US', UI.TIMESTAMP_FORMAT);
 	}, [currentInput.length === 0]); // Regenerate when input starts fresh
 	
-	if (!isSelected) {
-		return null; // Only show when prompt pane is selected
-	}
+	// Always show the input box, but change appearance based on selection
+	const borderColor = isSelected ? blueScale.base : grayScale.light;
 
 	return (
 		<Box
 			width="100%"
 			height={height}
 			borderStyle="round"
-			borderColor={blueScale.base}
+			borderColor={borderColor}
 			padding={1}
 			flexDirection="column"
 			justifyContent="center"

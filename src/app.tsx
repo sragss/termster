@@ -53,10 +53,10 @@ const App = () => {
 		const statusLineHeight = 1;
 		const headerHeight = 8; // HeaderAnimation height
 		const inputBoxHeight = 4; // Input box with border and padding
-		const availableHeight = totalRows - statusLineHeight - headerHeight - inputBoxHeight;
-		const paneHeight = availableHeight;
+		const availableHeight = totalRows - statusLineHeight - headerHeight;
+		const paneHeight = availableHeight - inputBoxHeight; // PromptPane height (leaves room for InputBox)
 		
-		return { totalCols, totalRows, paneHeight, inputBoxHeight };
+		return { totalCols, totalRows, paneHeight, inputBoxHeight, availableHeight };
 	}, [stdout.columns, stdout.rows]);
 
 	const handleApiKeySubmitted = useCallback(async (apiKey: string) => {

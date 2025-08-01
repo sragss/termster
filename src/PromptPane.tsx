@@ -1,7 +1,7 @@
 import React, {useCallback, useMemo} from 'react';
 import {Box, Text} from 'ink';
 import {grayScale, blueScale, whiteScale, redScale} from './colors.js';
-import {PATTERNS, UI} from './constants.js';
+import {PATTERNS} from './constants.js';
 import {usePromptContext} from './contexts/PromptContext.js';
 import ThinkingAnimation from './components/ThinkingAnimation.js';
 import ExecutingAnimation from './components/ExecutingAnimation.js';
@@ -51,7 +51,7 @@ const PromptPane = ({isSelected, height}: PromptPaneProps) => {
 
 	return (
 		<Box
-			width={UI.PANE_WIDTH}
+			width="100%"
 			height={height}
 			borderStyle="round"
 			borderColor={isSelected ? blueScale.base : grayScale.light}

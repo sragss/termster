@@ -12,6 +12,7 @@ interface MainContentProps {
 		paneHeight: number;
 		totalCols: number;
 		inputBoxHeight: number;
+		availableHeight: number;
 	};
 	onPtyReady: (pty: any) => void;
 	historyService: any;
@@ -40,28 +41,35 @@ const MainContent = ({
 		// Terminal input is handled by TerminalPane component
 	});
 
+	// Use the full available height for the main content area
+	const terminalHeight = dimensions.availableHeight;
+	const promptHeight = dimensions.paneHeight;
+
 	return (
-		<>
-			<Box width="100%" height={dimensions.paneHeight}>
-				<TerminalPane
-					isSelected={selectedPane === 'terminal'}
-					height={dimensions.paneHeight}
-					totalCols={dimensions.totalCols}
-					onPtyReady={onPtyReady}
-					historyService={historyService}
-				/>
+		<Box width="100%" height={terminalHeight}>
+			{/* Left side: Terminal pane (full height) */}
+			<TerminalPane
+				isSelected={selectedPane === 'terminal'}
+				height={terminalHeight}
+				totalCols={dimensions.totalCols}
+				onPtyReady={onPtyReady}
+				historyService={historyService}
+			/>
+			
+			{/* Right side: PromptPane + InputBox */}
+			<Box width="50%" height={terminalHeight} flexDirection="column">
 				<PromptPane
 					isSelected={selectedPane === 'prompt'}
-					height={dimensions.paneHeight}
+					height={promptHeight}
+				/>
+				
+				{/* Input Box - always shown, only interactive when prompt pane is selected */}
+				<InputBox
+					isSelected={selectedPane === 'prompt'}
+					height={dimensions.inputBoxHeight}
 				/>
 			</Box>
-
-			{/* Input Box - only shown when prompt pane is selected */}
-			<InputBox
-				isSelected={selectedPane === 'prompt'}
-				height={dimensions.inputBoxHeight}
-			/>
-		</>
+		</Box>
 	);
 };
 
