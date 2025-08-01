@@ -1,32 +1,18 @@
-import React, {useState, useCallback, useMemo} from 'react';
-import {Box, Text, useInput} from 'ink';
+import React, {useCallback, useMemo} from 'react';
+import {Box, Text} from 'ink';
 import {grayScale, blueScale, whiteScale, redScale} from './colors.js';
-import {TerminalHistoryService} from './services/terminal-history.js';
-import {useLLMChat} from './hooks/useLLMChat.js';
-import {PATTERNS, UI} from './constants.js';
-import {TerminalExecutor} from './tools/mutable-execution.js';
+import {PATTERNS} from './constants.js';
+import {usePromptContext} from './contexts/PromptContext.js';
 import ThinkingAnimation from './components/ThinkingAnimation.js';
+import ExecutingAnimation from './components/ExecutingAnimation.js';
 
 interface PromptPaneProps {
 	isSelected: boolean;
 	height: number;
-	onCommand?: (command: string) => void;
-	historyService?: TerminalHistoryService;
-	terminalExecutor?: TerminalExecutor;
 }
 
-const PromptPane = ({
-	isSelected,
-	height,
-	onCommand,
-	historyService,
-	terminalExecutor,
-}: PromptPaneProps) => {
-	const [currentInput, setCurrentInput] = useState('');
-	const {history, pendingApproval, sendMessage, addCommand, approveToolCall, rejectToolCall} = useLLMChat({
-		historyService,
-		terminalExecutor,
-	});
+const PromptPane = ({isSelected, height}: PromptPaneProps) => {
+	const {history} = usePromptContext();
 
 	// Memoize viewport calculations to prevent re-renders
 	const visibleLines = useMemo(() => Math.max(5, height - 4), [height]);
@@ -62,56 +48,10 @@ const PromptPane = ({
 		);
 	}, []);
 
-	// Create a stable timestamp for the current input session
-	const [currentTimestamp] = useState(() => {
-		const now = new Date();
-		return now.toLocaleTimeString('en-US', UI.TIMESTAMP_FORMAT);
-	});
-	
-
-	useInput((input, key) => {
-		if (!isSelected) return;
-
-		// Handle approval flow
-		if (pendingApproval) {
-			if (key.return) {
-				approveToolCall();
-				return;
-			} else if (key.escape) {
-				rejectToolCall();
-				return;
-			}
-			// Block all other input during approval
-			return;
-		}
-
-		if (key.return) {
-			if (currentInput.trim()) {
-				if (currentInput.startsWith('/')) {
-					// It's a command
-					const command = currentInput.slice(1); // Remove the "/"
-					addCommand(currentInput);
-
-					if (onCommand) {
-						onCommand(command);
-					}
-				} else {
-					// It's regular text - send to LLM
-					sendMessage(currentInput);
-				}
-
-				setCurrentInput('');
-			}
-		} else if (key.backspace || key.delete) {
-			setCurrentInput(prev => prev.slice(0, -1));
-		} else if (input) {
-			setCurrentInput(prev => prev + input);
-		}
-	});
 
 	return (
 		<Box
-			width={UI.PANE_WIDTH}
+			width="100%"
 			height={height}
 			borderStyle="round"
 			borderColor={isSelected ? blueScale.base : grayScale.light}
@@ -128,6 +68,8 @@ const PromptPane = ({
 						<Text dimColor>[{entry.timestamp}] </Text>
 						{entry.type === 'thinking' ? (
 							<ThinkingAnimation />
+						) : entry.type === 'executing' ? (
+							<ExecutingAnimation />
 						) : entry.type === 'tool_call' ? (
 							renderToolCallWithColors(entry.command)
 						) : entry.type === 'approval_pending' ? (
@@ -160,22 +102,6 @@ const PromptPane = ({
 				))}
 			</Box>
 
-			{/* Current input line */}
-			<Box width="100%">
-				{pendingApproval ? (
-					<Text wrap="wrap" color={blueScale.base}>
-						<Text dimColor>[{currentTimestamp}] </Text>
-						Waiting for approval... [Enter=Yes, Esc=No]{isSelected && <Text inverse> </Text>}
-					</Text>
-				) : (
-					<Text wrap="wrap">
-						<Text dimColor>[{currentTimestamp}] </Text>
-						<Text color={currentInput.startsWith('/') ? 'green' : 'white'}>
-							{currentInput}{isSelected && <Text inverse> </Text>}
-						</Text>
-					</Text>
-				)}
-			</Box>
 		</Box>
 	);
 };

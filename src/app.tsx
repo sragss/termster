@@ -2,12 +2,12 @@ import React, {useState, useRef, useEffect, useMemo, useCallback} from 'react';
 import {Box, Text, useInput, useStdout} from 'ink';
 import pty from 'node-pty';
 import HeaderAnimation from './HeaderAnimation.js';
-import TerminalPane from './TerminalPane.js';
-import PromptPane from './PromptPane.js';
 import ApiKeyPrompt from './components/ApiKeyPrompt.js';
 import {ConfigService} from './services/config.js';
 import {TerminalHistoryService} from './services/terminal-history.js';
 import {PTYTerminalExecutor} from './services/terminal-executor.js';
+import {PromptProvider} from './contexts/PromptContext.js';
+import MainContent from './components/MainContent.js';
 
 const App = () => {
 	const {stdout} = useStdout();
@@ -21,6 +21,15 @@ const App = () => {
 		new TerminalHistoryService(),
 	);
 	const [terminalExecutor, setTerminalExecutor] = useState<PTYTerminalExecutor | null>(null);
+
+	const handleCommand = useCallback((command: string) => {
+		if (ptyRef.current) {
+			// Send a newline first to ensure we're on a fresh line
+			ptyRef.current.write('\r');
+			// Send the command
+			ptyRef.current.write(command + '\r');
+		}
+	}, []); // No dependencies - ptyRef.current is accessed directly
 
 	// Check for API key on mount
 	useEffect(() => {
@@ -43,20 +52,12 @@ const App = () => {
 		const totalRows = stdout.rows - 2 || 24;
 		const statusLineHeight = 1;
 		const headerHeight = 8; // HeaderAnimation height
+		const inputBoxHeight = 4; // Input box with border and padding
 		const availableHeight = totalRows - statusLineHeight - headerHeight;
-		const paneHeight = availableHeight;
+		const paneHeight = availableHeight - inputBoxHeight; // PromptPane height (leaves room for InputBox)
 		
-		return { totalCols, totalRows, paneHeight };
+		return { totalCols, totalRows, paneHeight, inputBoxHeight, availableHeight };
 	}, [stdout.columns, stdout.rows]);
-
-	const handleCommand = useCallback((command: string) => {
-		if (ptyRef.current) {
-			// Send a newline first to ensure we're on a fresh line
-			ptyRef.current.write('\r');
-			// Send the command
-			ptyRef.current.write(command + '\r');
-		}
-	}, []); // No dependencies - ptyRef.current is accessed directly
 
 	const handleApiKeySubmitted = useCallback(async (apiKey: string) => {
 		try {
@@ -78,12 +79,7 @@ const App = () => {
 		if ((key.ctrl && input === 'c') || (key.ctrl && input === 'd')) {
 			process.exit(0);
 		}
-
-		// Only handle global app-level actions
-		if (key.shift && key.tab) {
-			setSelectedPane(prev => (prev === 'terminal' ? 'prompt' : 'terminal'));
-		}
-		// All other input is handled by individual pane components
+		// Other input handling moved to MainContent component
 	});
 
 	return (
@@ -105,22 +101,19 @@ const App = () => {
 					<ApiKeyPrompt onApiKeySubmitted={handleApiKeySubmitted} />
 				</Box>
 			) : (
-				<Box width="100%" height={dimensions.paneHeight}>
-					<TerminalPane
-						isSelected={selectedPane === 'terminal'}
-						height={dimensions.paneHeight}
-						totalCols={dimensions.totalCols}
+				<PromptProvider
+					historyService={historyService.current}
+					terminalExecutor={terminalExecutor || undefined}
+					onCommand={handleCommand}
+				>
+					<MainContent
+						selectedPane={selectedPane}
+						setSelectedPane={setSelectedPane}
+						dimensions={dimensions}
 						onPtyReady={handlePtyReady}
 						historyService={historyService.current}
 					/>
-					<PromptPane
-						isSelected={selectedPane === 'prompt'}
-						height={dimensions.paneHeight}
-						onCommand={handleCommand}
-						historyService={historyService.current}
-						terminalExecutor={terminalExecutor || undefined}
-					/>
-				</Box>
+				</PromptProvider>
 			)}
 
 			{/* Status line */}

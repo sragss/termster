@@ -7,7 +7,7 @@ import {UI} from '../constants.js';
 import {TerminalExecutor} from '../tools/mutable-execution.js';
 import {Logger} from '../services/logger.js';
 
-interface CommandEntry {
+export interface CommandEntry {
 	command: string;
 	timestamp: string;
 	type:
@@ -15,6 +15,7 @@ interface CommandEntry {
 		| 'text'
 		| 'assistant'
 		| 'thinking'
+		| 'executing'
 		| 'tool_call'
 		| 'approval_pending'
 		| 'approval_granted'
@@ -69,14 +70,11 @@ export const useLLMChat = ({
 		Logger.info(`APPROVAL: ${pendingApproval.toolCall.name} -> GRANTED`);
 		
 		const timestamp = formatTimestamp();
-		setHistory(prev => {
-			const withoutPending = prev.filter(entry => entry.type !== 'approval_pending');
-			return [
-				...withoutPending,
-				{command: 'Approved', timestamp, type: 'approval_granted'},
-				{command: '', timestamp, type: 'thinking'},
-			];
-		});
+		setHistory(prev => [
+			...prev,
+			{command: 'Approved', timestamp, type: 'approval_granted'},
+			{command: '', timestamp, type: 'executing'},
+		]);
 
 		// Execute the tool and show the normal render output
 		if (chatService.current?.toolExecutor) {
@@ -90,10 +88,11 @@ export const useLLMChat = ({
 				const renderedCall = renderToolCall(pendingApproval.toolCall.name, pendingApproval.toolCall.args);
 				const timestamp = formatTimestamp();
 				setHistory(prev => {
-					const withoutThinking = prev.filter(entry => entry.type !== 'thinking');
+					const withoutExecuting = prev.filter(entry => entry.type !== 'executing');
 					return [
-						...withoutThinking,
+						...withoutExecuting,
 						{command: renderedCall, timestamp, type: 'tool_call'},
+						{command: '', timestamp, type: 'thinking'},
 					];
 				});
 				
@@ -114,13 +113,10 @@ export const useLLMChat = ({
 		Logger.info(`APPROVAL: ${pendingApproval.toolCall.name} -> DENIED`);
 		
 		const timestamp = formatTimestamp();
-		setHistory(prev => {
-			const withoutPending = prev.filter(entry => entry.type !== 'approval_pending');
-			return [
-				...withoutPending,
-				{command: 'Rejected', timestamp, type: 'approval_denied'},
-			];
-		});
+		setHistory(prev => [
+			...prev,
+			{command: 'Rejected', timestamp, type: 'approval_denied'},
+		]);
 
 		pendingToolExecuteResolve.current('Tool execution was rejected by user');
 		pendingToolExecuteResolve.current = null;
