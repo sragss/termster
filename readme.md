@@ -109,3 +109,4 @@ Both log types are stored in the same directory for easy access and debugging.
 - [ ] HistoryService is a POS, needs full refactor
 - [ ] Thinking needs to come back after tool calling
 - [ ] Handle window resizing
+- [ ] Virtual scroll in the PromptPane is fully bricked.
