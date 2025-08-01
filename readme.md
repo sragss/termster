@@ -114,3 +114,4 @@ Both log types are stored in the same directory for easy access and debugging.
 - [ ] Exec tool call truncates too aggressively -- should have another tool that can read contents progressively
 - [ ] HistoryService is a POS, needs full refactor
 - [ ] Thinking needs to come back after tool calling
+- [ ] Handle window resizing
