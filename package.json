@@ -11,7 +11,8 @@
 		"build": "tsc",
 		"start": "npm run build && termster",
 		"devtools": "npm run build && DEV=true termster",
-		"test": "prettier --check . && xo && ava"
+		"test": "prettier --check . && xo && ava",
+		"install-global": "npm run build && npm install -g ."
 	},
 	"files": [
 		"dist"

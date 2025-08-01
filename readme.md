@@ -1,31 +1,25 @@
 # termster
+Lightweight agentic Terminal that prioritizes visibility of Terminal commands, runs directly in your Terminal.
+
+Two simple panes, always visible: Terminal, Chat.
 
 ![Termster Demo](imgs/termster_2.gif)
 
-A terminal emulator with AI chat capabilities built using React and Ink.
+Built with [Echo](https://echo.merit.systems/) to handle end-user credits.
 
 ## Install
 
-### Option 1: From npm (when published)
-```bash
-npm install -g termster
-```
-
-### Option 2: From source
+### From source
 ```bash
 # Clone the repository
 git clone https://github.com/sragss/termster.git
 cd termster
 
-# Install dependencies and build
-npm install
-npm run build
-
-# Install globally from local build
-npm install -g .
+# Install dependencies and build + install globally
+npm install && npm run install-global
 ```
 
-### Option 3: Run without installing
+### Dev: Run without installing
 ```bash
 # Clone and run directly
 git clone https://github.com/sragss/termster.git
