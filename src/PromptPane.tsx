@@ -4,6 +4,7 @@ import {grayScale, blueScale, whiteScale, redScale} from './colors.js';
 import {PATTERNS, UI} from './constants.js';
 import {usePromptContext} from './contexts/PromptContext.js';
 import ThinkingAnimation from './components/ThinkingAnimation.js';
+import ExecutingAnimation from './components/ExecutingAnimation.js';
 
 interface PromptPaneProps {
 	isSelected: boolean;
@@ -67,6 +68,8 @@ const PromptPane = ({isSelected, height}: PromptPaneProps) => {
 						<Text dimColor>[{entry.timestamp}] </Text>
 						{entry.type === 'thinking' ? (
 							<ThinkingAnimation />
+						) : entry.type === 'executing' ? (
+							<ExecutingAnimation />
 						) : entry.type === 'tool_call' ? (
 							renderToolCallWithColors(entry.command)
 						) : entry.type === 'approval_pending' ? (

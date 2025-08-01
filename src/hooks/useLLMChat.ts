@@ -73,7 +73,7 @@ export const useLLMChat = ({
 		setHistory(prev => [
 			...prev,
 			{command: 'Approved', timestamp, type: 'approval_granted'},
-			{command: '', timestamp, type: 'thinking'},
+			{command: '', timestamp, type: 'executing'},
 		]);
 
 		// Execute the tool and show the normal render output
@@ -88,10 +88,11 @@ export const useLLMChat = ({
 				const renderedCall = renderToolCall(pendingApproval.toolCall.name, pendingApproval.toolCall.args);
 				const timestamp = formatTimestamp();
 				setHistory(prev => {
-					const withoutThinking = prev.filter(entry => entry.type !== 'thinking');
+					const withoutExecuting = prev.filter(entry => entry.type !== 'executing');
 					return [
-						...withoutThinking,
+						...withoutExecuting,
 						{command: renderedCall, timestamp, type: 'tool_call'},
+						{command: '', timestamp, type: 'thinking'},
 					];
 				});
 				
